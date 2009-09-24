@@ -21,6 +21,17 @@ module MongoLoggerModifications
     }
   end
   
+  def level_to_sym(level)
+    case level
+      when 0 then :debug
+      when 1 then :info
+      when 2 then :warn
+      when 3 then :error
+      when 4 then :fatal
+      when 5 then :unknown
+    end
+  end
+  
   def mongoize(options={})      
     @mongo_record = options.merge({
       :messages => Hash.new { |hash, key| hash[key] = Array.new },
