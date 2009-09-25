@@ -37,13 +37,12 @@ class MongoLogger < ActiveSupport::BufferedLogger
   end
 
   def mongoize(options={})   
-    the_controller = options.delete(:_controller)
     @mongo_record = options.merge({
       :messages => Hash.new { |hash, key| hash[key] = Array.new },
       :request_time => Time.now.utc
     })
     runtime = Benchmark.measure do
-      yield the_controller
+      yield
     end
     @mongo_record[:runtime]     = (runtime.real * 1000).ceil
     self.class.mongo_connection[self.class.mongo_collection_name].insert(@mongo_record) rescue nil

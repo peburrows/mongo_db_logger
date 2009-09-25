@@ -5,6 +5,6 @@ module MongoDBLogging
 
   def enable_mongo_logging
     return yield unless Rails.logger.respond_to?(:mongoize)
-    Rails.logger.mongoize(:action => action_name, :controller => controller_name, :params => params, :ip => request.remote_ip) { yield }
+    Rails.logger.mongoize(:action => action_name, :controller => controller_name, :params => filter_parameters(params), :ip => request.remote_ip) { yield }
   end
 end
