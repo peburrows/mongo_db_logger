@@ -42,10 +42,10 @@ class MongoLogger < ActiveSupport::BufferedLogger
       :messages => Hash.new { |hash, key| hash[key] = Array.new },
       :request_time => Time.now.utc
     })
-    runtime = Benchmark.ms do
+    runtime = Benchmark.measure do
       yield the_controller
     end
-    @mongo_record[:runtime]     = runtime.ceil
+    @mongo_record[:runtime]     = (runtime.real * 1000).ceil
     self.class.mongo_connection[self.class.mongo_collection_name].insert(@mongo_record) rescue nil
   end
 
