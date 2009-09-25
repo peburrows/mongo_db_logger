@@ -1,2 +1,2 @@
-# Include hook code here
-require 'mongo_db_logger'
+require 'mongo_logger'
+require 'mongo_db_logging'
