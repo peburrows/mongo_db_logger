@@ -17,7 +17,7 @@ Usage:
 
 3) add mongo settings for each environment in which you want to use MongoDB for logging:
 
-<code>
+<pre><code>
 development:
   adapter: mysql
   database: my_app_development
@@ -27,13 +27,13 @@ development:
     capsize: <%= 10.megabytes %>
     host: localhost
     port: 27017
-</code>
+</code></pre>
 
 With that in place, a new MongoDB document (record) will be created for each request and,
 by default will record the following information: Runtime, IP Address, Request Time, Controller,
 Action, Params and All messages sent to the logger. The structure of the Mongo document looks something like this:
 
-<code>
+<pre><code>
 {
   'controller'    : controller_name,
   'action'        : action_name,
@@ -49,51 +49,51 @@ Action, Params and All messages sent to the logger. The structure of the Mongo d
                       'fatal' : [ ]
                     }
 }
-</code>
+</code></pre>
 
 Beyond that, if you want to add extra information to the base of the document
 (let’s say something like user_guid on every request that it’s available),
 you can just call the Rails.logger.add_metadata method on your logger like so:
 
-<code>
+<pre><code>
 # make sure we're using the MongoLogger in this environment
 if Rails.logger.respond_to?(:add_metadata)
   Rails.logger.add_metadata(:user_guid =&gt; @user_guid)
 end
-</code>
+</code></pre>
 
 And now, for a couple quick examples on getting ahold of this log data…
 First, here’s how to get a handle on the MongoDB from within a Rails console:
 
-<code>
+<pre><code>
 >> db = MongoLogger.mongo_connection
 => #<Mongo::DB:0x102f19ac0 @slave_ok=nil, @name="my_app" ... >
 
 >> collection = db[MongoLogger.mongo_collection_name]
 => #<Mongo::Collection:0x1031b3ee8 @name="development_log" ... >
-</code>
+</code></pre>
 
 Once you’ve got the collection, you can find all requests for a specific user (with guid):
 
-<code>
+<pre><code>
 >> cursor = collection.find(:user_guid => '12355')
 => #<Mongo::Cursor:0x1031a3e30 ... >
 >> cursor.count
 => 5
-</code>
+</code></pre>
 
 Find all requests that took more that one second to complete:
 
-<code>
+<pre><code>
 >> collection.find({:runtime => {'$gt' => 1000}}).count
 => 3
-</code>
+</code></pre>
 
 Find all requests that passed a parameter with a certain value:
 
-<code>
+<pre><code>
 >> collection.find({'params.currency' => 'USD'}).count
 => 22
-</code>
+</code></pre>
 
 Copyright (c) 2009 Phil Burrows, released under the MIT license
