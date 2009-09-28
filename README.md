@@ -24,7 +24,7 @@ development:
   user: root
   mongo:
     database: my_app
-    capsize: <%= 10.megabytes %>
+    capsize: &lt;%= 10.megabytes %&gt;
     host: localhost
     port: 27017
 </code></pre>
@@ -67,17 +67,17 @@ First, here’s how to get a handle on the MongoDB from within a Rails console:
 
 <pre><code>
 >> db = MongoLogger.mongo_connection
-=> #<Mongo::DB:0x102f19ac0 @slave_ok=nil, @name="my_app" ... >
+=> #&lt;Mongo::DB:0x102f19ac0 @slave_ok=nil, @name="my_app" ... &gt;
 
 >> collection = db[MongoLogger.mongo_collection_name]
-=> #<Mongo::Collection:0x1031b3ee8 @name="development_log" ... >
+=> #&lt;Mongo::Collection:0x1031b3ee8 @name="development_log" ... &gt;
 </code></pre>
 
 Once you’ve got the collection, you can find all requests for a specific user (with guid):
 
 <pre><code>
 >> cursor = collection.find(:user_guid => '12355')
-=> #<Mongo::Cursor:0x1031a3e30 ... >
+=> #&lt;Mongo::Cursor:0x1031a3e30 ... &gt;
 >> cursor.count
 => 5
 </code></pre>
