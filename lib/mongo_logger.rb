@@ -9,12 +9,16 @@ class MongoLogger < ActiveSupport::BufferedLogger
     'port'    => 27017,
     'capsize' => default_capsize}.merge( YAML::load(ERB.new(IO.read(File.join(Rails.root, 'config/database.yml'))).result)[Rails.env]['mongo'] )
 
-  @mongo_collection_name      = "#{Rails.env}_log"
-  @mongo_connection ||= Mongo::Connection.new(db_configuration['host'], db_configuration['port'], :auto_reconnect => true).db(db_configuration['database'])
+  begin
+    @mongo_collection_name      = "#{Rails.env}_log"
+    @mongo_connection ||= Mongo::Connection.new(db_configuration['host'], db_configuration['port'], :auto_reconnect => true).db(db_configuration['database'])
 
-  # setup the capped collection if it doesn't already exist
-  unless @mongo_connection.collection_names.include?(@mongo_collection_name)
-    @mongo_connection.create_collection(@mongo_collection_name, {:capped => true, :size => db_configuration['capsize']})
+    # setup the capped collection if it doesn't already exist
+    unless @mongo_connection.collection_names.include?(@mongo_collection_name)
+      @mongo_connection.create_collection(@mongo_collection_name, {:capped => true, :size => db_configuration['capsize']})
+    end
+  rescue => e
+    puts "=> !! A connection to mongo could not be established - the logger will function like a normal ActiveSupport::BufferedLogger !!"
   end
 
   class << self
@@ -51,7 +55,7 @@ class MongoLogger < ActiveSupport::BufferedLogger
   def add_metadata(options={})
     options.each_pair do |key, value|
       unless [:messages, :request_time, :ip, :runtime].include?(key.to_sym)
-        info("adding #{key} => #{value}")
+        info("[MongoLogger : metadata] '#{key}' => '#{value}'")
         @mongo_record[key] = value
       else
         raise ArgumentError, ":#{key} is a reserved key for the mongo logger. Please choose a different key"
