@@ -1,3 +1,4 @@
+# please, please, please protect this controller behind a login
 class MongoDBLogging::MongoController < ActionController::Base
   append_view_path(File.join(File.dirname(__FILE__), "../../views"))
   
