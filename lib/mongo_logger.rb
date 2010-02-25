@@ -4,10 +4,12 @@ require 'mongo'
 class MongoLogger < ActiveSupport::BufferedLogger
   default_capsize = (Rails.env == 'production') ? 250.megabytes : 100.megabytes
   
+  user_config = YAML::load(ERB.new(IO.read(File.join(Rails.root, 'config/database.yml'))).result)[Rails.env]['mongo'] || {}
+  
   db_configuration = {
     'host'    => 'localhost',
     'port'    => 27017,
-    'capsize' => default_capsize}.merge( YAML::load(ERB.new(IO.read(File.join(Rails.root, 'config/database.yml'))).result)[Rails.env]['mongo'] )
+    'capsize' => default_capsize}.merge(user_config)
 
   begin
     @mongo_collection_name      = "#{Rails.env}_log"
