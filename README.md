@@ -70,6 +70,10 @@ logging view by adding the following to your routes:
 map.add_mongo_logger_resources!
 </code></pre>
 
+With that you can then visit "/mongo" to view log entries (latest first).  You can add
+parameters like "page=3" to page through to older entries, or "count=30" to change the
+number of log entries per page.
+
 And now, for a couple quick examples on getting ahold of this log data…
 First, here’s how to get a handle on the MongoDB from within a Rails console:
 
