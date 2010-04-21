@@ -11,7 +11,7 @@
   <table id="mongo_list">
     <thead>
       <tr class="header">
-        <th>ID</th>
+        <th>ID, timestamp</th>
         <th>controller</th>
         <th>action</th>
         <th>messages</th>
@@ -20,7 +20,7 @@
     <tbody>
       <% @records.each do |record| -%>
       <tr class="record">
-        <td class="id"><%= record['_id'] %></td>
+        <td class="id"><%= record['_id'] %><br/><%= record['request_time'].strftime("%d-%b-%Y %H:%M:%S %Z") %></td>
         <td class="controller"><%= record['controller'] %></td>
         <td class="action"><%= record['action'] %></td>
         <td class="messages">        
