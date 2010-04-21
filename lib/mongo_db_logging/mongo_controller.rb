@@ -5,12 +5,12 @@ class MongoDBLogging::MongoController < ActionController::Base
   helper_method :format_messages
 
   def index
-    @count    = (params[:count] || 50).to_i
-    @page     = (params[:page] || 1).to_i
-    @offset   = (@page - 1) * @count
-    @db = MongoLogger.mongo_connection
-    @collection = @db[MongoLogger.mongo_collection_name]
-    @records = @collection.find(nil, :limit => (params[:count] || 50).to_i, :offset => @offset)
+    count      = (params[:count] || 50).to_i
+    @page      = (params[:page] || 1).to_i
+    offset     = (@page - 1) * count
+    db         = MongoLogger.mongo_connection
+    collection = db[MongoLogger.mongo_collection_name]
+    @records   = collection.find({}, :skip => offset, :limit => count, :sort => [[ '_id', :desc ]])
   end
 
   def show

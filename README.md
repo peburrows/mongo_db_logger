@@ -53,13 +53,21 @@ Action, Params and All messages sent to the logger. The structure of the Mongo d
 
 Beyond that, if you want to add extra information to the base of the document
 (let’s say something like user_guid on every request that it’s available),
-you can just call the Rails.logger.add_metadata method on your logger like so:
+you can just call the Rails.logger.add_metadata method on your logger like so
+(for example from a before_filter):
 
 <pre><code>
 # make sure we're using the MongoLogger in this environment
 if Rails.logger.respond_to?(:add_metadata)
   Rails.logger.add_metadata(:user_guid =&gt; @user_guid)
 end
+</code></pre>
+
+4) And optionally, and PLEASE be sure to protect this behind a login, you can add a basic
+logging view by adding the following to your routes:
+
+<pre><code>
+map.add_mongo_logger_resources!
 </code></pre>
 
 And now, for a couple quick examples on getting ahold of this log data…

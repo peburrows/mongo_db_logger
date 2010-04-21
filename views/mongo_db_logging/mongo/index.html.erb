@@ -2,8 +2,12 @@
 <html>
 <head>
   <title>Mongo Logs</title>
+  <style>
+    td { border-top: 1px dotted black; vertical-align: top; }
+  </style>
 </head>
 <body>
+  <p>Log records (latest/newest entries first), page <%= @page %></p>
   <table id="mongo_list">
     <thead>
       <tr class="header">
