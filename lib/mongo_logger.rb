@@ -50,7 +50,19 @@ class MongoLogger < ActiveSupport::BufferedLogger
     runtime = Benchmark.measure do
       yield
     end
-    @mongo_record[:runtime]     = (runtime.real * 1000).ceil
+    insert_log_record(runtime)
+  rescue Exception => e
+    # See level_to_sym
+    add(3, e.message + "\n" + e.backtrace.join("\n"))
+    # The benchmark block where the controller code executed never returned,
+    # so we don't get an elapsed runtime
+    insert_log_record(0)
+    # Reraise the exception for anyone else who cares
+    raise e
+  end
+
+  def insert_log_record(runtime)
+    @mongo_record[:runtime] = (runtime.real * 1000).ceil
     self.class.mongo_connection[self.class.mongo_collection_name].insert(@mongo_record) rescue nil
   end
 
