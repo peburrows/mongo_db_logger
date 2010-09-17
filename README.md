@@ -4,6 +4,13 @@ Log to MongoDB from a Rails app
 
 ## Usage
 
+1. Install the plugin:
+
+        # Rails 3
+        rails plugin install git://github.com/customink/mongo_db_logger.git
+        # Rails 2
+        script/plugin install git://github.com/customink/mongo_db_logger.git
+
 1. Add the following line to your ApplicationController:
 
         include MongoDBLogging
@@ -12,7 +19,7 @@ Log to MongoDB from a Rails app
 
         config.logger = MongoLogger.new
 
-1. Add mongo settings for each environment in which you want to use MongoDB for logging. The values below are defaults :
+1. Add mongo settings to database.yml for each environment in which you want to use MongoDB for logging. The values below are defaults:
 
         development:
           adapter: mysql
