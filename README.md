@@ -27,7 +27,7 @@ Log to MongoDB from a Rails app
           user: root
           mongo:
             database: my_app               # required
-            capsize: &lt;%= 10.megabytes %&gt; # default: 250MB for production; 100MB otherwise
+            capsize: <%= 10.megabytes %>   # default: 250MB for production; 100MB otherwise
             host: localhost                # default: localhost
             port: 27017                    # default: 27017
 
