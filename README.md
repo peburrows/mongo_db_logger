@@ -11,11 +11,11 @@ Usage:
 
 <code>include MongoDBLogging</code>
 
-2) configure specific environments to use the MongoLogger (in config/#{environment}.rb):
+2) configure specific environments to use the MongoLogger (in config/environments/#{environment}.rb):
 
 <code>config.logger = MongoLogger.new</code>
 
-3) add mongo settings for each environment in which you want to use MongoDB for logging:
+3) add mongo settings for each environment in which you want to use MongoDB for logging. The values below are defaults :
 
 <pre><code>
 development:
@@ -23,10 +23,10 @@ development:
   database: my_app_development
   user: root
   mongo:
-    database: my_app
-    capsize: &lt;%= 10.megabytes %&gt;
-    host: localhost
-    port: 27017
+    database: my_app                   # required
+    capsize: &lt;%= 10.megabytes %&gt; # default: 250MB for production; 100MB otherwise
+    host: localhost                    # default: localhost
+    port: 27017                        # default: 27017
 </code></pre>
 
 With that in place, a new MongoDB document (record) will be created for each request and,
@@ -101,11 +101,16 @@ Find all requests that took more that one second to complete:
 => 3
 </code></pre>
 
-Find all requests that passed a parameter with a certain value:
+Find all order#show requests with a particular order id (id=order_id):
 
 <pre><code>
->> collection.find({'params.currency' => 'USD'}).count
-=> 22
+>> collection.find({"controller" => "order", "action"=> "show", "params.id" => order_id})
+</code></pre>
+
+Find all requests with an exception that contains "RoutingError" in the message or stack trace:
+
+<pre><code>
+>> collection.find({"messages.error" => /RoutingError/})
 </code></pre>
 
 Copyright (c) 2009 Phil Burrows, released under the MIT license
