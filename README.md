@@ -23,10 +23,10 @@ development:
   database: my_app_development
   user: root
   mongo:
-    database: my_app                   # required
+    database: my_app               # required
     capsize: &lt;%= 10.megabytes %&gt; # default: 250MB for production; 100MB otherwise
-    host: localhost                    # default: localhost
-    port: 27017                        # default: 27017
+    host: localhost                # default: localhost
+    port: 27017                    # default: 27017
 </code></pre>
 
 With that in place, a new MongoDB document (record) will be created for each request and,
