@@ -1,116 +1,97 @@
-MongoDbLogger
-=============
+# MongoDbLogger
 
 Log to MongoDB from a Rails app
 
+## Usage
 
-Usage:
-======
+1. Add the following line to your ApplicationController:
 
-1) add the following line to your ApplicationController:
+        include MongoDBLogging
 
-<code>include MongoDBLogging</code>
+1. Configure specific environments to use the MongoLogger (in config/environments/#{environment}.rb):
 
-2) configure specific environments to use the MongoLogger (in config/environments/#{environment}.rb):
+        config.logger = MongoLogger.new
 
-<code>config.logger = MongoLogger.new</code>
+1. Add mongo settings for each environment in which you want to use MongoDB for logging. The values below are defaults :
 
-3) add mongo settings for each environment in which you want to use MongoDB for logging. The values below are defaults :
+        development:
+          adapter: mysql
+          database: my_app_development
+          user: root
+          mongo:
+            database: my_app               # required
+            capsize: &lt;%= 10.megabytes %&gt; # default: 250MB for production; 100MB otherwise
+            host: localhost                # default: localhost
+            port: 27017                    # default: 27017
 
-<pre><code>
-development:
-  adapter: mysql
-  database: my_app_development
-  user: root
-  mongo:
-    database: my_app               # required
-    capsize: &lt;%= 10.megabytes %&gt; # default: 250MB for production; 100MB otherwise
-    host: localhost                # default: localhost
-    port: 27017                    # default: 27017
-</code></pre>
+  With that in place, a new MongoDB document (record) will be created for each request and,
+  by default will record the following information: Runtime, IP Address, Request Time, Controller,
+  Action, Params and All messages sent to the logger. The structure of the Mongo document looks something like this:
 
-With that in place, a new MongoDB document (record) will be created for each request and,
-by default will record the following information: Runtime, IP Address, Request Time, Controller,
-Action, Params and All messages sent to the logger. The structure of the Mongo document looks something like this:
+        {
+          'controller'    : controller_name,
+          'action'        : action_name,
+          'ip'            : ip_address,
+          'runtime'       : runtime,
+          'request_time'  : time_of_request,
+          'params'        : { }
+          'messages'      : {
+                              'info'  : [ ],
+                              'debug' : [ ],
+                              'error' : [ ],
+                              'warn'  : [ ],
+                              'fatal' : [ ]
+                            }
+        }
 
-<pre><code>
-{
-  'controller'    : controller_name,
-  'action'        : action_name,
-  'ip'            : ip_address,
-  'runtime'       : runtime,
-  'request_time'  : time_of_request,
-  'params'        : { }
-  'messages'      : {
-                      'info'  : [ ],
-                      'debug' : [ ],
-                      'error' : [ ],
-                      'warn'  : [ ],
-                      'fatal' : [ ]
-                    }
-}
-</code></pre>
+  Beyond that, if you want to add extra information to the base of the document
+  (let’s say something like user_guid on every request that it’s available),
+  you can just call the Rails.logger.add_metadata method on your logger like so
+  (for example from a before_filter):
 
-Beyond that, if you want to add extra information to the base of the document
-(let’s say something like user_guid on every request that it’s available),
-you can just call the Rails.logger.add_metadata method on your logger like so
-(for example from a before_filter):
+        # make sure we're using the MongoLogger in this environment
+        if Rails.logger.respond_to?(:add_metadata)
+          Rails.logger.add_metadata(:user_guid =&gt; @user_guid)
+        end
 
-<pre><code>
-# make sure we're using the MongoLogger in this environment
-if Rails.logger.respond_to?(:add_metadata)
-  Rails.logger.add_metadata(:user_guid =&gt; @user_guid)
-end
-</code></pre>
-
-4) And optionally, and PLEASE be sure to protect this behind a login, you can add a basic
+1. And optionally, and PLEASE be sure to protect this behind a login, you can add a basic
 logging view by adding the following to your routes:
 
-<pre><code>
-map.add_mongo_logger_resources!
-</code></pre>
+        map.add_mongo_logger_resources!
 
-With that you can then visit "/mongo" to view log entries (latest first).  You can add
-parameters like "page=3" to page through to older entries, or "count=30" to change the
-number of log entries per page.
+  With that you can then visit `/mongo` to view log entries (latest first).  You can add
+  parameters like `page=3` to page through to older entries, or `count=30` to change the
+  number of log entries per page.
+
+## Examples
 
 And now, for a couple quick examples on getting ahold of this log data…
 First, here’s how to get a handle on the MongoDB from within a Rails console:
 
-<pre><code>
->> db = MongoLogger.mongo_connection
-=> #&lt;Mongo::DB:0x102f19ac0 @slave_ok=nil, @name="my_app" ... &gt;
+    >> db = MongoLogger.mongo_connection
+    => #&lt;Mongo::DB:0x102f19ac0 @slave_ok=nil, @name="my_app" ... &gt;
 
->> collection = db[MongoLogger.mongo_collection_name]
-=> #&lt;Mongo::Collection:0x1031b3ee8 @name="development_log" ... &gt;
-</code></pre>
+    >> collection = db[MongoLogger.mongo_collection_name]
+    => #&lt;Mongo::Collection:0x1031b3ee8 @name="development_log" ... &gt;
 
 Once you’ve got the collection, you can find all requests for a specific user (with guid):
 
-<pre><code>
->> cursor = collection.find(:user_guid => '12355')
-=> #&lt;Mongo::Cursor:0x1031a3e30 ... &gt;
->> cursor.count
-=> 5
-</code></pre>
+    >> cursor = collection.find(:user_guid => '12355')
+    => #&lt;Mongo::Cursor:0x1031a3e30 ... &gt;
+    >> cursor.count
+    => 5
 
 Find all requests that took more that one second to complete:
 
-<pre><code>
->> collection.find({:runtime => {'$gt' => 1000}}).count
-=> 3
-</code></pre>
+    >> collection.find({:runtime => {'$gt' => 1000}}).count
+    => 3
 
 Find all order#show requests with a particular order id (id=order_id):
 
-<pre><code>
->> collection.find({"controller" => "order", "action"=> "show", "params.id" => order_id})
-</code></pre>
+    >> collection.find({"controller" => "order", "action"=> "show", "params.id" => order_id})
 
 Find all requests with an exception that contains "RoutingError" in the message or stack trace:
 
-<pre><code>
->> collection.find({"messages.error" => /RoutingError/})
-</code></pre>
+    >> collection.find({"messages.error" => /RoutingError/})
 
 Copyright (c) 2009 Phil Burrows, released under the MIT license
