@@ -3,9 +3,9 @@ require 'mongo'
 
 class MongoLogger < ActiveSupport::BufferedLogger
   default_capsize = (Rails.env == 'production') ? 250.megabytes : 100.megabytes
-  
+
   user_config = YAML::load(ERB.new(IO.read(File.join(Rails.root, 'config/database.yml'))).result)[Rails.env]['mongo'] || {}
-  
+
   db_configuration = {
     'host'    => 'localhost',
     'port'    => 27017,
@@ -42,10 +42,10 @@ class MongoLogger < ActiveSupport::BufferedLogger
     end
   end
 
-  def mongoize(options={})   
+  def mongoize(options={})
     @mongo_record = options.merge({
       :messages => Hash.new { |hash, key| hash[key] = Array.new },
-      :request_time => Time.now.utc
+      :request_time => Time.now.getutc
     })
     runtime = Benchmark.measure do
       yield
