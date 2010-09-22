@@ -6,18 +6,18 @@ class MongoLogger < ActiveSupport::BufferedLogger
 
   user_config = YAML::load(ERB.new(IO.read(File.join(Rails.root, 'config/database.yml'))).result)[Rails.env]['mongo'] || {}
 
-  db_configuration = {
-    'host'    => 'localhost',
-    'port'    => 27017,
+  @db_configuration = {
+    'host' => 'localhost',
+    'port' => 27017,
     'capsize' => default_capsize}.merge(user_config)
 
   begin
-    @mongo_collection_name      = "#{Rails.env}_log"
-    @mongo_connection ||= Mongo::Connection.new(db_configuration['host'], db_configuration['port'], :auto_reconnect => true).db(db_configuration['database'])
+    @mongo_collection_name = "#{Rails.env}_log"
+    @mongo_connection ||= Mongo::Connection.new(@db_configuration['host'], @db_configuration['port'], :auto_reconnect => true).db(@db_configuration['database'])
 
     # setup the capped collection if it doesn't already exist
     unless @mongo_connection.collection_names.include?(@mongo_collection_name)
-      @mongo_connection.create_collection(@mongo_collection_name, {:capped => true, :size => db_configuration['capsize']})
+      MongoLogger.create_collection
     end
   rescue => e
     puts "=> !! A connection to mongo could not be established - the logger will function like a normal ActiveSupport::BufferedLogger !!"
@@ -25,6 +25,16 @@ class MongoLogger < ActiveSupport::BufferedLogger
 
   class << self
     attr_reader :mongo_collection_name, :mongo_connection
+
+    # Drop the capped_collection and recreate it
+    def reset_collection
+      @mongo_connection[@mongo_collection_name].drop
+      MongoLogger.create_collection
+    end
+
+    def create_collection
+      @mongo_connection.create_collection(@mongo_collection_name, {:capped => true, :size => @db_configuration['capsize']})
+    end
   end
 
   def initialize(level=DEBUG)
