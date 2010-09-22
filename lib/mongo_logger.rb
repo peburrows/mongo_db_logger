@@ -57,18 +57,17 @@ class MongoLogger < ActiveSupport::BufferedLogger
       :messages => Hash.new { |hash, key| hash[key] = Array.new },
       :request_time => Time.now.getutc
     })
+    # In case of exception, make sure it's set
+    runtime = 0
     runtime = Benchmark.measure do
       yield
     end
-    insert_log_record(runtime)
   rescue Exception => e
-    # See level_to_sym
     add(3, e.message + "\n" + e.backtrace.join("\n"))
-    # The benchmark block where the controller code executed never returned,
-    # so we don't get an elapsed runtime
-    insert_log_record(0)
     # Reraise the exception for anyone else who cares
     raise e
+  ensure
+    insert_log_record(runtime)
   end
 
   def insert_log_record(runtime)
