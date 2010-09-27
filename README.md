@@ -15,7 +15,8 @@ Log to MongoDB from a Rails app
 
         include MongoDBLogging
 
-1. Configure specific environments to use the MongoLogger (in config/environments/#{environment}.rb):
+1. If using Rails < 3, configure specific environments to use the MongoLogger (in config/environments/#{environment}.rb).  Otherwise, the logger is
+automatically configured for all environments.
 
         config.logger = MongoLogger.new
 
