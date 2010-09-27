@@ -11,6 +11,10 @@ class MongoLogger < ActiveSupport::BufferedLogger
     'port' => 27017,
     'capsize' => default_capsize}.merge(user_config)
 
+  def self.create_collection
+    @mongo_connection.create_collection(@mongo_collection_name, {:capped => true, :size => @db_configuration['capsize']})
+  end
+
   begin
     @mongo_collection_name = "#{Rails.env}_log"
     @mongo_connection ||= Mongo::Connection.new(@db_configuration['host'], @db_configuration['port'], :auto_reconnect => true).db(@db_configuration['database'])
@@ -30,10 +34,6 @@ class MongoLogger < ActiveSupport::BufferedLogger
     def reset_collection
       @mongo_connection[@mongo_collection_name].drop
       MongoLogger.create_collection
-    end
-
-    def create_collection
-      @mongo_connection.create_collection(@mongo_collection_name, {:capped => true, :size => @db_configuration['capsize']})
     end
   end
 
