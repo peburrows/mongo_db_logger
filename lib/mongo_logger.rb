@@ -24,7 +24,9 @@ class MongoLogger < ActiveSupport::BufferedLogger
       MongoLogger.create_collection
     end
   rescue => e
+    # in case the logger is fouled up use stdout
     puts "=> !! A connection to mongo could not be established - the logger will function like a normal ActiveSupport::BufferedLogger !!"
+    puts e.message + "\n" + e.backtrace.join("\n")
   end
 
   class << self
