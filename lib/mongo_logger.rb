@@ -90,14 +90,10 @@ class MongoLogger < ActiveSupport::BufferedLogger
 
   def add(severity, message = nil, progname = nil, &block)
     unless @level > severity
-      if logging_colorized?
-        # remove colorization done by rails to just save the actual message
-        @mongo_record[:messages][level_to_sym(severity)] << message.gsub(/(\e(\[([\d;]*[mz]?))?)?/, '').strip rescue nil
-      else
-        @mongo_record[:messages][level_to_sym(severity)] << message
-      end
+      # remove Rails colorization to get the actual message
+      message.try(:gsub!, /(\e(\[([\d;]*[mz]?))?)?/, '').try(:strip!) if logging_colorized?
+      @mongo_record[:messages][level_to_sym(severity)] << message
     end
-
     super
   end
 
