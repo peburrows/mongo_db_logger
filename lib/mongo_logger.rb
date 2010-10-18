@@ -2,79 +2,18 @@ require 'erb'
 require 'mongo'
 
 class MongoLogger < ActiveSupport::BufferedLogger
-  default_capsize = (Rails.env == 'production') ? 250.megabytes : 100.megabytes
+  PRODUCTION_COLLECTION_SIZE = 250.megabytes
+  DEFAULT_COLLECTION_SIZE = 100.megabytes
 
-  user_config = YAML::load(ERB.new(IO.read(File.join(Rails.root, 'config/database.yml'))).result)[Rails.env]['mongo'] || {}
+  attr_reader :db_configuration, :mongo_connection, :mongo_collection_name
 
-  @db_configuration = {
-    'host' => 'localhost',
-    'port' => 27017,
-    'capsize' => default_capsize}.merge(user_config)
-
-  def self.create_collection
-    @mongo_connection.create_collection(@mongo_collection_name, {:capped => true, :size => @db_configuration['capsize']})
-  end
-
-  begin
-    @mongo_collection_name = "#{Rails.env}_log"
-    @mongo_connection ||= Mongo::Connection.new(@db_configuration['host'], @db_configuration['port'], :auto_reconnect => true).db(@db_configuration['database'])
-
-    # setup the capped collection if it doesn't already exist
-    unless @mongo_connection.collection_names.include?(@mongo_collection_name)
-      MongoLogger.create_collection
-    end
+  def initialize(level=DEBUG)
+    super(File.join(Rails.root, "log/#{Rails.env}.log"), level)
+    internal_initialize
   rescue => e
     # in case the logger is fouled up use stdout
     puts "=> !! A connection to mongo could not be established - the logger will function like a normal ActiveSupport::BufferedLogger !!"
     puts e.message + "\n" + e.backtrace.join("\n")
-  end
-
-  class << self
-    attr_reader :mongo_collection_name, :mongo_connection
-
-    # Drop the capped_collection and recreate it
-    def reset_collection
-      @mongo_connection[@mongo_collection_name].drop
-      MongoLogger.create_collection
-    end
-  end
-
-  def initialize(level=DEBUG)
-    super(File.join(Rails.root, "log/#{Rails.env}.log"), level)
-  end
-
-  def level_to_sym(level)
-    case level
-      when 0 then :debug
-      when 1 then :info
-      when 2 then :warn
-      when 3 then :error
-      when 4 then :fatal
-      when 5 then :unknown
-    end
-  end
-
-  def mongoize(options={})
-    @mongo_record = options.merge({
-      :messages => Hash.new { |hash, key| hash[key] = Array.new },
-      :request_time => Time.now.getutc
-    })
-    # In case of exception, make sure it's set
-    runtime = 0
-    runtime = Benchmark.measure do
-      yield
-    end
-  rescue Exception => e
-    add(3, e.message + "\n" + e.backtrace.join("\n"))
-    # Reraise the exception for anyone else who cares
-    raise e
-  ensure
-    insert_log_record(runtime)
-  end
-
-  def insert_log_record(runtime)
-    @mongo_record[:runtime] = (runtime.real * 1000).ceil
-    self.class.mongo_connection[self.class.mongo_collection_name].insert(@mongo_record) rescue nil
   end
 
   def add_metadata(options={})
@@ -97,10 +36,88 @@ class MongoLogger < ActiveSupport::BufferedLogger
     super
   end
 
-  def logging_colorized?
-    Object.const_defined?(:ActiveRecord) &&
-    (Rails::VERSION::MAJOR >= 3 ?
-      ActiveRecord::LogSubscriber.colorize_logging :
-      ActiveRecord::Base.colorize_logging)
+  # Drop the capped_collection and recreate it
+  def reset_collection
+    @mongo_connection[@mongo_collection_name].drop
+    create_collection
   end
+
+  def mongoize(options={})
+    @mongo_record = options.merge({
+      :messages => Hash.new { |hash, key| hash[key] = Array.new },
+      :request_time => Time.now.getutc
+    })
+    # In case of exception, make sure it's set
+    runtime = 0
+    runtime = Benchmark.measure do
+      yield
+    end
+  rescue Exception => e
+    add(3, e.message + "\n" + e.backtrace.join("\n"))
+    # Reraise the exception for anyone else who cares
+    raise e
+  ensure
+    insert_log_record(runtime)
+  end
+
+  private
+    # facilitate mocking during tests
+    def internal_initialize
+      configure
+      connect
+      check_for_collection
+    end
+
+    def configure
+      default_capsize = (Rails.env == 'production') ? PRODUCTION_COLLECTION_SIZE : DEFAULT_COLLECTION_SIZE
+      user_config = YAML::load(ERB.new(IO.read(File.join(Rails.root, 'config/database.yml'))).result)[Rails.env]['mongo'] || {}
+
+      @mongo_collection_name = "#{Rails.env}_log"
+
+      @db_configuration = {
+        'host' => 'localhost',
+        'port' => 27017,
+        'capsize' => default_capsize}.merge(user_config)
+    end
+
+    def connect
+      @mongo_connection ||= Mongo::Connection.new(@db_configuration['host'],
+                                                  @db_configuration['port'],
+                                                  :auto_reconnect => true).db(@db_configuration['database'])
+    end
+
+    def create_collection
+      @mongo_connection.create_collection(@mongo_collection_name,
+                                          {:capped => true, :size => @db_configuration['capsize']})
+    end
+
+    def check_for_collection
+      # setup the capped collection if it doesn't already exist
+      unless @mongo_connection.collection_names.include?(@mongo_collection_name)
+        create_collection
+      end
+    end
+
+    def insert_log_record(runtime)
+      @mongo_record[:runtime] = (runtime.real * 1000).ceil
+      @mongo_connection[@mongo_collection_name].insert(@mongo_record) rescue nil
+    end
+
+    def level_to_sym(level)
+      case level
+        when 0 then :debug
+        when 1 then :info
+        when 2 then :warn
+        when 3 then :error
+        when 4 then :fatal
+        when 5 then :unknown
+      end
+    end
+
+    def logging_colorized?
+      Object.const_defined?(:ActiveRecord) &&
+      (Rails::VERSION::MAJOR >= 3 ?
+        ActiveRecord::LogSubscriber.colorize_logging :
+        ActiveRecord::Base.colorize_logging)
+    end
 end # class MongoLogger
