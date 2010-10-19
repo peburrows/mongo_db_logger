@@ -61,7 +61,7 @@ class MongoLogger < ActiveSupport::BufferedLogger
   end
 
   private
-    # facilitate mocking during tests
+    # facilitate testing
     def internal_initialize
       configure
       connect
