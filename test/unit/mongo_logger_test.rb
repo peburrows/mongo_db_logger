@@ -39,7 +39,7 @@ class MongoLoggerTest < Test::Unit::TestCase
           @mongo_logger.send(:check_for_collection)
           assert @con.collection_names.include?(@mongo_logger.mongo_collection_name)
           # new capped collections are X MB + 5888 bytes, but don't be too strict in case that changes
-          assert @con.stats["storageSize"] < MongoLogger::DEFAULT_COLLECTION_SIZE + 1.megabyte
+          assert @con[@mongo_logger.mongo_collection_name].stats["storageSize"] < MongoLogger::DEFAULT_COLLECTION_SIZE + 1.megabyte
         end
       end
     end
