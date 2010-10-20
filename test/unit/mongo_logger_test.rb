@@ -1,8 +1,11 @@
 require 'test_helper'
 require 'mongo_logger'
+require 'mongo_logger_test_helper'
 
 # test the basic stuff
 class MongoLoggerTest < Test::Unit::TestCase
+  include MongoLoggerTestHelper, ShouldaHelper
+
   context "A MongoLogger" do
     context "during configuration in instantiation" do
       setup do
@@ -41,40 +44,64 @@ class MongoLoggerTest < Test::Unit::TestCase
       end
     end
 
-    context "upon log insertion" do
+    context "after instantiation" do
       setup do
-      @mongo_logger = MongoLogger.new
-      @con = @mongo_logger.mongo_connection
-        @mongo_logger.mongoize({"id" => 1}) do
-          @mongo_logger.info("Log record")
+        @mongo_logger = MongoLogger.new
+        @con = @mongo_logger.mongo_connection
+      end
+
+      context "upon insertion of a log record when active record is not used" do
+        # mock ActiveRecord has not been included
+        setup do
+          log("Test")
+        end
+
+        should_contain_one_log_record
+
+        should "allow recreation of the capped collection to remove all records" do
+          @mongo_logger.reset_collection
+          assert_equal 0, @con[@mongo_logger.mongo_collection_name].count
         end
       end
 
-      should "insert a log record into the capped collection" do
-        assert_equal 1, @con[@mongo_logger.mongo_collection_name].count
-      end
+      context "upon insertion of a colorized log record when ActiveRecord is used" do
+        setup do
+          @log_message = "TESTING"
+          require_bogus_active_record
+          @mongo_logger.reset_collection
+          log("\e[31m #{@log_message} \e[0m")
+        end
 
-      should "allow recreation of the capped collection" do
-        @mongo_logger.reset_collection
-        assert_equal 0, @con[@mongo_logger.mongo_collection_name].count
-      end
-    end
+        should "detect logging is colorized" do
+          assert @mongo_logger.send(:logging_colorized?)
+        end
 
-    context "When connected to a mongo instance" do
-      should "remove colorized logging chars" do
+        should_contain_one_log_record
+
+        should "strip out colorization from log messages" do
+          assert_equal 1, @con[@mongo_logger.mongo_collection_name].find({"messages.debug" => @log_message}).count
+        end
       end
 
       should "add application metadata to the log record" do
+        options = {"application" => self.class.name}
+        log_metadata(options)
+        assert_equal 1, @con[@mongo_logger.mongo_collection_name].find({"application" => self.class.name}).count
+      end
+    end
+
+    context "logging at INFO level" do
+      setup do
+        @mongo_logger = MongoLogger.new(MongoLogger::INFO)
+        @mongo_logger.reset_collection
+        @con = @mongo_logger.mongo_connection
+        log("INFO")
       end
 
-      should "not remove colorized logging chars when colorize_logging is off" do
-      end
+      should_contain_one_log_record
 
-      should "not log messages at a lower level than configured" do
-      end
-
-      should "log exceptions" do
-        # Needs testing in controller
+      should "not log DEBUG messages" do
+        assert_equal 0, @con[@mongo_logger.mongo_collection_name].find_one({}, :fields => ["messages"])["messages"].count
       end
     end
   end
