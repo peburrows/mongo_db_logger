@@ -27,8 +27,8 @@ class MongoLoggerTest < Test::Unit::TestCase
       context "upon connecting to an empty database" do
         setup do
           @mongo_logger.send(:connect)
-          @con = @mongo_logger.mongo_connection
-          @con[@mongo_logger.mongo_collection_name].drop
+          common_setup
+          @collection.drop
         end
 
         should "expose a valid mongo connection" do
@@ -39,7 +39,7 @@ class MongoLoggerTest < Test::Unit::TestCase
           @mongo_logger.send(:check_for_collection)
           assert @con.collection_names.include?(@mongo_logger.mongo_collection_name)
           # new capped collections are X MB + 5888 bytes, but don't be too strict in case that changes
-          assert @con[@mongo_logger.mongo_collection_name].stats["storageSize"] < MongoLogger::DEFAULT_COLLECTION_SIZE + 1.megabyte
+          assert @collection.stats["storageSize"] < MongoLogger::DEFAULT_COLLECTION_SIZE + 1.megabyte
         end
       end
     end
@@ -47,7 +47,7 @@ class MongoLoggerTest < Test::Unit::TestCase
     context "after instantiation" do
       setup do
         @mongo_logger = MongoLogger.new
-        @con = @mongo_logger.mongo_connection
+        common_setup
       end
 
       context "upon insertion of a log record when active record is not used" do
@@ -60,7 +60,7 @@ class MongoLoggerTest < Test::Unit::TestCase
 
         should "allow recreation of the capped collection to remove all records" do
           @mongo_logger.reset_collection
-          assert_equal 0, @con[@mongo_logger.mongo_collection_name].count
+          assert_equal 0, @collection.count
         end
       end
 
@@ -79,14 +79,14 @@ class MongoLoggerTest < Test::Unit::TestCase
         should_contain_one_log_record
 
         should "strip out colorization from log messages" do
-          assert_equal 1, @con[@mongo_logger.mongo_collection_name].find({"messages.debug" => @log_message}).count
+          assert_equal 1, @collection.find({"messages.debug" => @log_message}).count
         end
       end
 
       should "add application metadata to the log record" do
         options = {"application" => self.class.name}
         log_metadata(options)
-        assert_equal 1, @con[@mongo_logger.mongo_collection_name].find({"application" => self.class.name}).count
+        assert_equal 1, @collection.find({"application" => self.class.name}).count
       end
     end
 
@@ -94,14 +94,14 @@ class MongoLoggerTest < Test::Unit::TestCase
       setup do
         @mongo_logger = MongoLogger.new(MongoLogger::INFO)
         @mongo_logger.reset_collection
-        @con = @mongo_logger.mongo_connection
+        common_setup
         log("INFO")
       end
 
       should_contain_one_log_record
 
       should "not log DEBUG messages" do
-        assert_equal 0, @con[@mongo_logger.mongo_collection_name].find_one({}, :fields => ["messages"])["messages"].count
+        assert_equal 0, @collection.find_one({}, :fields => ["messages"])["messages"].count
       end
     end
   end

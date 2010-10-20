@@ -14,4 +14,9 @@ module MongoLoggerTestHelper
   def require_bogus_active_record
     require 'active_record'
   end
+
+  def common_setup
+    @con = @mongo_logger.mongo_connection
+    @collection = @con[@mongo_logger.mongo_collection_name]
+  end
 end
