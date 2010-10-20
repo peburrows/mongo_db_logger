@@ -4,7 +4,8 @@ require 'mongo_logger_test_helper'
 
 # test the basic stuff
 class MongoLoggerTest < Test::Unit::TestCase
-  include MongoLoggerTestHelper, ShouldaHelper
+  include MongoLoggerTestHelper
+  extend LogMacros
 
   context "A MongoLogger" do
     context "during configuration in instantiation" do
