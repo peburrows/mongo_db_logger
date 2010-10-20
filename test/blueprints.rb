@@ -1,4 +1,8 @@
 class Rails
+  module VERSION
+    MAJOR = 3
+  end
+
   def self.env
     "test"
   end
