@@ -3,7 +3,6 @@ require 'rake/testtask'
 require 'rake/rdoctask'
 require 'rubygems'
 require 'bundler'
-require 'rcov/rcovtask'
 require 'jeweler'
 
 desc 'Default: run unit tests.'
@@ -27,9 +26,9 @@ Jeweler::Tasks.new do |gem|
   gem.authors = ["Phil Burrows", "Alex Stupka"]
   gem.rubyforge_project = "mongo_db_logger"
   # Assume jeweler can't figure out deps without executable?
-  gem.add_dependency "mongo"
-  gem.add_dependency "bson_ext"
-  gem.add_dependency "rails"
+  #gem.add_dependency "mongo"
+  #gem.add_dependency "bson_ext"
+  #gem.add_dependency "rails"
 end
 Jeweler::RubyforgeTasks.new do |rubyforge|
   rubyforge.doc_task = "rdoc"
@@ -41,13 +40,6 @@ Rake::TestTask.new(:test) do |test|
   test.pattern = 'test/**/*_test.rb'
   test.verbose = true
 end
-
-Rcov::RcovTask.new do |test|
-  test.libs << 'test'
-  test.pattern = 'test/**/*_test.rb'
-  test.verbose = true
-end
-
 
 Rake::RDocTask.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
