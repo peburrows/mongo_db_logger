@@ -21,14 +21,10 @@ Jeweler::Tasks.new do |gem|
   gem.name = "mongo_db_logger"
   gem.summary = %Q{Ruby Mongo DB Logger for Rails}
   gem.description = %Q{Centralized logging for rails apps in MongoDB. The idea and most of the code is from http://github.com/peburrows/mongo_db_logger}
-  gem.email = "alex.stupka@gmail.com"
+  gem.email = "astupka@customink.com"
   gem.homepage = "http://github.com/customink/mongo_db_logger"
   gem.authors = ["Phil Burrows", "Alex Stupka"]
   gem.rubyforge_project = "mongo_db_logger"
-  # Assume jeweler can't figure out deps without executable?
-  #gem.add_dependency "mongo"
-  #gem.add_dependency "bson_ext"
-  #gem.add_dependency "rails"
 end
 Jeweler::RubyforgeTasks.new do |rubyforge|
   rubyforge.doc_task = "rdoc"
