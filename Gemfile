@@ -10,7 +10,7 @@ group :production do
 end
 
 group :development do
-  gem "jeweler"
+  gem "jeweler", "~> 1.5.0.pre5"
   gem "shoulda"
   gem "i18n"
   gem "activesupport"
