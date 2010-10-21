@@ -6,6 +6,8 @@ gem "mongo"
 gem "bson_ext"
 
 group :production do
+  # don't want to force development to have this requirement, because every
+  # Rails dependency is mocked
   gem "rails", "~> 3.0.0"
 end
 
