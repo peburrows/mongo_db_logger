@@ -9,38 +9,47 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Phil Burrows", "Alex Stupka"]
-  s.date = %q{2010-10-05}
+  s.date = %q{2010-10-21}
   s.description = %q{Centralized logging for rails apps in MongoDB. The idea and most of the code is from http://github.com/peburrows/mongo_db_logger}
-  s.email = %q{alex.stupka@gmail.com}
+  s.email = %q{astupka@customink.com}
   s.extra_rdoc_files = [
     "README.md"
   ]
   s.files = [
-    ".bundle/config",
-     ".gitignore",
-     "Gemfile",
-     "Gemfile.lock",
-     "MIT-LICENSE",
-     "README.md",
-     "Rakefile",
-     "VERSION",
-     "lib/mongo_db_logger.rb",
-     "lib/mongo_db_logging.rb",
-     "lib/mongo_db_logging/mongo_controller.rb",
-     "lib/mongo_db_logging/routing_extensions.rb",
-     "lib/mongo_logger.rb",
-     "views/mongo_db_logging/mongo/index.html.erb"
+    ".rvmrc",
+    "Gemfile",
+    "Gemfile.lock",
+    "MIT-LICENSE",
+    "README.md",
+    "Rakefile",
+    "VERSION",
+    "lib/mongo_db_logger.rb",
+    "lib/mongo_db_logging.rb",
+    "lib/mongo_db_logging/mongo_controller.rb",
+    "lib/mongo_db_logging/routing_extensions.rb",
+    "lib/mongo_logger.rb",
+    "mongo_db_logger.gemspec",
+    "test/active_record.rb",
+    "test/blueprints.rb",
+    "test/config/database.yml",
+    "test/mongo_logger_test_helper.rb",
+    "test/shoulda_macros/log_macros.rb",
+    "test/test_helper.rb",
+    "test/unit/mongo_logger_test.rb",
+    "views/mongo_db_logging/mongo/index.html.erb"
   ]
   s.homepage = %q{http://github.com/customink/mongo_db_logger}
-  s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubyforge_project = %q{mongo_db_logger}
   s.rubygems_version = %q{1.3.7}
   s.summary = %q{Ruby Mongo DB Logger for Rails}
   s.test_files = [
+    "test/active_record.rb",
     "test/blueprints.rb",
-     "test/helper.rb",
-     "test/unit/test_mongo_db_logger.rb"
+    "test/mongo_logger_test_helper.rb",
+    "test/shoulda_macros/log_macros.rb",
+    "test/test_helper.rb",
+    "test/unit/mongo_logger_test.rb"
   ]
 
   if s.respond_to? :specification_version then
@@ -48,18 +57,39 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q<rake>, [">= 0"])
+      s.add_runtime_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_runtime_dependency(%q<mongo>, [">= 0"])
       s.add_runtime_dependency(%q<bson_ext>, [">= 0"])
-      s.add_runtime_dependency(%q<rails>, [">= 0"])
+      s.add_development_dependency(%q<jeweler>, ["~> 1.5.0.pre5"])
+      s.add_development_dependency(%q<shoulda>, [">= 0"])
+      s.add_development_dependency(%q<i18n>, [">= 0"])
+      s.add_development_dependency(%q<activesupport>, [">= 0"])
+      s.add_development_dependency(%q<mocha>, [">= 0"])
+      s.add_development_dependency(%q<ruby-debug19>, [">= 0"])
     else
+      s.add_dependency(%q<rake>, [">= 0"])
+      s.add_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_dependency(%q<mongo>, [">= 0"])
       s.add_dependency(%q<bson_ext>, [">= 0"])
-      s.add_dependency(%q<rails>, [">= 0"])
+      s.add_dependency(%q<jeweler>, ["~> 1.5.0.pre5"])
+      s.add_dependency(%q<shoulda>, [">= 0"])
+      s.add_dependency(%q<i18n>, [">= 0"])
+      s.add_dependency(%q<activesupport>, [">= 0"])
+      s.add_dependency(%q<mocha>, [">= 0"])
+      s.add_dependency(%q<ruby-debug19>, [">= 0"])
     end
   else
+    s.add_dependency(%q<rake>, [">= 0"])
+    s.add_dependency(%q<bundler>, ["~> 1.0.0"])
     s.add_dependency(%q<mongo>, [">= 0"])
     s.add_dependency(%q<bson_ext>, [">= 0"])
-    s.add_dependency(%q<rails>, [">= 0"])
+    s.add_dependency(%q<jeweler>, ["~> 1.5.0.pre5"])
+    s.add_dependency(%q<shoulda>, [">= 0"])
+    s.add_dependency(%q<i18n>, [">= 0"])
+    s.add_dependency(%q<activesupport>, [">= 0"])
+    s.add_dependency(%q<mocha>, [">= 0"])
+    s.add_dependency(%q<ruby-debug19>, [">= 0"])
   end
 end
 
