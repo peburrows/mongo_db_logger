@@ -1,5 +1,6 @@
 require 'erb'
 require 'mongo'
+require 'active_support/core_ext'
 
 class MongoLogger < ActiveSupport::BufferedLogger
   PRODUCTION_COLLECTION_SIZE = 250.megabytes
