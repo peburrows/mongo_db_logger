@@ -1,10 +1,8 @@
 require 'test_helper'
 require 'mongo_logger'
-require 'mongo_logger_test_helper'
 
 # test the basic stuff
 class MongoLoggerTest < Test::Unit::TestCase
-  include MongoLoggerTestHelper
   extend LogMacros
 
   context "A MongoLogger" do
