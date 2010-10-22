@@ -8,8 +8,10 @@ class MongoLogger < ActiveSupport::BufferedLogger
 
   attr_reader :db_configuration, :mongo_connection, :mongo_collection_name
 
-  def initialize(level=DEBUG)
-    super(File.join(Rails.root, "log/#{Rails.env}.log"), level)
+  def initialize(options={})
+    path = options[:path] || File.join(Rails.root, "log/#{Rails.env}.log")
+    level = options[:level] || DEBUG
+    super(path, level)
     internal_initialize
   rescue => e
     # in case the logger is fouled up use stdout

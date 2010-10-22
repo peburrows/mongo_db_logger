@@ -91,7 +91,7 @@ class MongoLoggerTest < Test::Unit::TestCase
 
     context "logging at INFO level" do
       setup do
-        @mongo_logger = MongoLogger.new(MongoLogger::INFO)
+        @mongo_logger = MongoLogger.new(:level => MongoLogger::INFO)
         @mongo_logger.reset_collection
         common_setup
         log("INFO")
