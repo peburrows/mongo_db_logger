@@ -29,7 +29,5 @@ if Rails::VERSION::MAJOR == 3
       end
     end
   end
-else
-  Rails.configuration.logger = MongoLogger.new
 end
 
