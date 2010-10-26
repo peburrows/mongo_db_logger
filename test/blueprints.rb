@@ -4,7 +4,7 @@ class Rails
   end
 
   def self.env
-    "test"
+     ActiveSupport::StringInquirer.new("test")
   end
 
   def self.root
