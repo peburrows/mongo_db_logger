@@ -1,5 +1,6 @@
 require 'erb'
 require 'mongo'
+require 'active_support'
 require 'active_support/core_ext'
 
 class MongoLogger < ActiveSupport::BufferedLogger
@@ -72,7 +73,7 @@ class MongoLogger < ActiveSupport::BufferedLogger
     end
 
     def configure
-      default_capsize = (Rails.env == 'production') ? PRODUCTION_COLLECTION_SIZE : DEFAULT_COLLECTION_SIZE
+      default_capsize = Rails.env.production? ? PRODUCTION_COLLECTION_SIZE : DEFAULT_COLLECTION_SIZE
       user_config = YAML::load(ERB.new(IO.read(File.join(Rails.root, 'config/database.yml'))).result)[Rails.env]['mongo'] || {}
 
       @mongo_collection_name = "#{Rails.env}_log"
