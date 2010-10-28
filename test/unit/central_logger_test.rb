@@ -1,51 +1,51 @@
 require 'test_helper'
-require 'mongo_logger'
+require 'central_logger/mongo_logger'
 
 # test the basic stuff
-class MongoLoggerTest < Test::Unit::TestCase
+class CentralLogger::MongoLoggerTest < Test::Unit::TestCase
   extend LogMacros
 
-  context "A MongoLogger" do
+  context "A CentralLogger::MongoLogger" do
     context "during configuration in instantiation" do
       setup do
-        MongoLogger.any_instance.stubs(:internal_initialize).returns(nil)
-        @mongo_logger = MongoLogger.new
-        @mongo_logger.send(:configure)
+        CentralLogger::MongoLogger.any_instance.stubs(:internal_initialize).returns(nil)
+        @central_logger = CentralLogger::MongoLogger.new
+        @central_logger.send(:configure)
       end
 
       should "set the default host, port, and capsize if not configured" do
-        assert_equal 'localhost', @mongo_logger.db_configuration['host']
-        assert_equal 27017, @mongo_logger.db_configuration['port']
-        assert_equal MongoLogger::DEFAULT_COLLECTION_SIZE, @mongo_logger.db_configuration['capsize']
+        assert_equal 'localhost', @central_logger.db_configuration['host']
+        assert_equal 27017, @central_logger.db_configuration['port']
+        assert_equal CentralLogger::MongoLogger::DEFAULT_COLLECTION_SIZE, @central_logger.db_configuration['capsize']
       end
 
       should "set the mongo collection name depending on the Rails environment" do
-        assert_equal "#{Rails.env}_log", @mongo_logger.mongo_collection_name
+        assert_equal "#{Rails.env}_log", @central_logger.mongo_collection_name
       end
 
       context "upon connecting to an empty database" do
         setup do
-          @mongo_logger.send(:connect)
+          @central_logger.send(:connect)
           common_setup
           @collection.drop
         end
 
         should "expose a valid mongo connection" do
-          assert_instance_of Mongo::DB, @mongo_logger.mongo_connection
+          assert_instance_of Mongo::DB, @central_logger.mongo_connection
         end
 
         should "create a capped collection in the database with the configured size" do
-          @mongo_logger.send(:check_for_collection)
-          assert @con.collection_names.include?(@mongo_logger.mongo_collection_name)
+          @central_logger.send(:check_for_collection)
+          assert @con.collection_names.include?(@central_logger.mongo_collection_name)
           # new capped collections are X MB + 5888 bytes, but don't be too strict in case that changes
-          assert @collection.stats["storageSize"] < MongoLogger::DEFAULT_COLLECTION_SIZE + 1.megabyte
+          assert @collection.stats["storageSize"] < CentralLogger::MongoLogger::DEFAULT_COLLECTION_SIZE + 1.megabyte
         end
       end
     end
 
     context "after instantiation" do
       setup do
-        @mongo_logger = MongoLogger.new
+        @central_logger = CentralLogger::MongoLogger.new
         common_setup
       end
 
@@ -58,7 +58,7 @@ class MongoLoggerTest < Test::Unit::TestCase
         should_contain_one_log_record
 
         should "allow recreation of the capped collection to remove all records" do
-          @mongo_logger.reset_collection
+          @central_logger.reset_collection
           assert_equal 0, @collection.count
         end
       end
@@ -67,12 +67,12 @@ class MongoLoggerTest < Test::Unit::TestCase
         setup do
           @log_message = "TESTING"
           require_bogus_active_record
-          @mongo_logger.reset_collection
+          @central_logger.reset_collection
           log("\e[31m #{@log_message} \e[0m")
         end
 
         should "detect logging is colorized" do
-          assert @mongo_logger.send(:logging_colorized?)
+          assert @central_logger.send(:logging_colorized?)
         end
 
         should_contain_one_log_record
@@ -91,8 +91,8 @@ class MongoLoggerTest < Test::Unit::TestCase
 
     context "logging at INFO level" do
       setup do
-        @mongo_logger = MongoLogger.new(:level => MongoLogger::INFO)
-        @mongo_logger.reset_collection
+        @central_logger = CentralLogger::MongoLogger.new(:level => CentralLogger::MongoLogger::INFO)
+        @central_logger.reset_collection
         common_setup
         log("INFO")
       end

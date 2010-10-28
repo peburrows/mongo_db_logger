@@ -10,14 +10,14 @@ Shoulda.autoload_macros("#{File.dirname(__FILE__)}/..")
 
 class Test::Unit::TestCase
   def log(msg)
-    @mongo_logger.mongoize({"id" => 1}) do
-      @mongo_logger.debug(msg)
+    @central_logger.mongoize({"id" => 1}) do
+      @central_logger.debug(msg)
     end
   end
 
   def log_metadata(options)
-    @mongo_logger.mongoize({"id" => 1}) do
-      @mongo_logger.add_metadata(options)
+    @central_logger.mongoize({"id" => 1}) do
+      @central_logger.add_metadata(options)
     end
   end
 
@@ -26,7 +26,7 @@ class Test::Unit::TestCase
   end
 
   def common_setup
-    @con = @mongo_logger.mongo_connection
-    @collection = @con[@mongo_logger.mongo_collection_name]
+    @con = @central_logger.mongo_connection
+    @collection = @con[@central_logger.mongo_collection_name]
   end
 end
