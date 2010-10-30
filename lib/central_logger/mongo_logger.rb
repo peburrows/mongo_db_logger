@@ -23,8 +23,7 @@ module CentralLogger
 
     def add_metadata(options={})
       options.each_pair do |key, value|
-        unless [:messages, :request_time, :ip, :runtime].include?(key.to_sym)
-          info("[MongoLogger : metadata] '#{key}' => '#{value}'")
+        unless [:messages, :request_time, :ip, :runtime, :application_name].include?(key.to_sym)
           @mongo_record[key] = value
         else
           raise ArgumentError, ":#{key} is a reserved key for the central logger. Please choose a different key"
@@ -50,7 +49,8 @@ module CentralLogger
     def mongoize(options={})
       @mongo_record = options.merge({
         :messages => Hash.new { |hash, key| hash[key] = Array.new },
-        :request_time => Time.now.getutc
+        :request_time => Time.now.getutc,
+        :application_name => Rails.root.basename.to_s
       })
       # In case of exception, make sure it's set
       runtime = 0
