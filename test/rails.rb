@@ -4,10 +4,10 @@ class Rails
   end
 
   def self.env
-     ActiveSupport::StringInquirer.new("test")
+    ActiveSupport::StringInquirer.new("test")
   end
 
   def self.root
-    File.dirname(__FILE__)
+    Pathname.new(File.dirname(__FILE__))
   end
 end

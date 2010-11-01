@@ -1,7 +1,9 @@
 require 'test/unit'
 require 'shoulda'
 require 'mocha'
-require 'blueprints'
+# mock rails class
+require 'pathname'
+require 'rails'
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
