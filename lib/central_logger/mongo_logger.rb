@@ -50,7 +50,7 @@ module CentralLogger
       @mongo_record = options.merge({
         :messages => Hash.new { |hash, key| hash[key] = Array.new },
         :request_time => Time.now.getutc,
-        :application_name => Rails.root.basename.to_s
+        :application_name => @application_name
       })
       # In case of exception, make sure it's set
       runtime = 0
@@ -76,6 +76,7 @@ module CentralLogger
       def configure
         default_capsize = Rails.env.production? ? PRODUCTION_COLLECTION_SIZE : DEFAULT_COLLECTION_SIZE
         user_config = YAML::load(ERB.new(IO.read(File.join(Rails.root, 'config/database.yml'))).result)[Rails.env]['mongo'] || {}
+        @application_name = Rails.root.basename.to_s
 
         @mongo_collection_name = "#{Rails.env}_log"
 
