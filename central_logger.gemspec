@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{central_logger}
-  s.version = "0.0.0"
+  s.version = "0.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Phil Burrows", "Alex Stupka"]
-  s.date = %q{2010-10-28}
+  s.date = %q{2010-11-01}
   s.description = %q{Centralized logging for rails apps using MongoDB. The idea and the core code is from http://github.com/peburrows/central_logger}
   s.email = %q{astupka@customink.com}
   s.extra_rdoc_files = [
@@ -23,18 +23,16 @@ Gem::Specification.new do |s|
     "README.md",
     "Rakefile",
     "VERSION",
+    "central_logger.gemspec",
     "lib/central_logger.rb",
-    "lib/central_logger/central_logger_controller.rb",
     "lib/central_logger/filter.rb",
     "lib/central_logger/initializer.rb",
     "lib/central_logger/initializer_mixin.rb",
     "lib/central_logger/mongo_logger.rb",
-    "lib/central_logger/routing_extensions.rb",
-    "lib/central_logger/views/central_logger/log/index.html.erb",
     "lib/railtie.rb",
     "test/active_record.rb",
-    "test/blueprints.rb",
     "test/config/database.yml",
+    "test/rails.rb",
     "test/shoulda_macros/log_macros.rb",
     "test/test_helper.rb",
     "test/unit/central_logger_test.rb"
@@ -46,7 +44,7 @@ Gem::Specification.new do |s|
   s.summary = %q{Central Logger for Rails}
   s.test_files = [
     "test/active_record.rb",
-    "test/blueprints.rb",
+    "test/rails.rb",
     "test/shoulda_macros/log_macros.rb",
     "test/test_helper.rb",
     "test/unit/central_logger_test.rb"
