@@ -1,22 +1,19 @@
 # CentralLogger
 
-Log to a central MongoDB from a Rails app
+Log to a central MongoDB from Rails apps.
 
 ## Usage
 
-1. Install the plugin:
+1. Install the gem:
 
-        # Rails 3
-        rails plugin install git://github.com/customink/central_logger.git
-        # Rails 2
-        script/plugin install git://github.com/customink/central_logger.git
+        gem install central_logger
 
 1. Add the following line to your ApplicationController:
 
         include CentralLogger::Filter
 
-1. If using Rails < 3, configure environment.rb to use the CentralLogger (in config/environment.rb).  Otherwise, the logger is
-automatically configured for all environments.
+1. If using Rails < 3, configure environment.rb as shown below (in config/environment.rb).  Otherwise, the logger is
+automatically initialized for all environments.
 
        require 'central_logger'
        CentralLogger::Initializer.initialize_deprecated_logger(config)
@@ -35,26 +32,29 @@ automatically configured for all environments.
 
   With that in place, a new MongoDB document (record) will be created for each request and,
   by default will record the following information: Runtime, IP Address, Request Time, Controller,
-  Action, Params and All messages sent to the logger. The structure of the Mongo document looks something like this:
+  Action, Params, Application Name and All messages sent to the logger. The structure of the Mongo document looks like this:
 
         {
-          'controller'    : controller_name,
-          'action'        : action_name,
-          'ip'            : ip_address,
-          'runtime'       : runtime,
-          'request_time'  : time_of_request,
-          'params'        : { }
-          'messages'      : {
-                              'info'  : [ ],
-                              'debug' : [ ],
-                              'error' : [ ],
-                              'warn'  : [ ],
-                              'fatal' : [ ]
-                            }
+          'action'           : action_name,
+          'application_name' : action_name,
+          'controller'       : controller_name,
+          'ip'               : ip_address,
+          'messages'         : {
+                                 'info'  : [ ],
+                                 'debug' : [ ],
+                                 'error' : [ ],
+                                 'warn'  : [ ],
+                                 'fatal' : [ ]
+                               },
+          'params'           : { },
+          'path'             : path,
+          'request_time'     : date_of_request,
+          'runtime'          : elapsed_execution_time_in_seconds,
+          'url'              : full_url
         }
 
   Beyond that, if you want to add extra information to the base of the document
-  (let’s say something like user_guid on every request that it’s available),
+  (let's say something like user_guid on every request that it's available),
   you can just call the Rails.logger.add_metadata method on your logger like so
   (for example from a before_filter):
 
@@ -63,19 +63,10 @@ automatically configured for all environments.
           Rails.logger.add_metadata(:user_guid =&gt; @user_guid)
         end
 
-1. And optionally, and PLEASE be sure to protect this behind a login, you can add a basic
-logging view by adding the following to your routes:
-
-        map.add_central_logger_resources!
-
-  With that you can then visit `/log` to view log entries (latest first).  You can add
-  parameters like `page=3` to page through to older entries, or `count=30` to change the
-  number of log entries per page.
-
 ## Examples
 
-And now, for a couple quick examples on getting ahold of this log data…
-First, here’s how to get a handle on the MongoDB from within a Rails console:
+And now, for a couple quick examples on getting ahold of this log data...
+First, here's how to get a handle on the MongoDB from within a Rails console:
 
     >> db = Rails.logger.mongo_connection
     => #&lt;Mongo::DB:0x102f19ac0 @slave_ok=nil, @name="my_app" ... &gt;
@@ -83,7 +74,7 @@ First, here’s how to get a handle on the MongoDB from within a Rails console:
     >> collection = db[Rails.logger.mongo_collection_name]
     => #&lt;Mongo::Collection:0x1031b3ee8 @name="development_log" ... &gt;
 
-Once you’ve got the collection, you can find all requests for a specific user (with guid):
+Once you've got the collection, you can find all requests for a specific user (with guid):
 
     >> cursor = collection.find(:user_guid => '12355')
     => #&lt;Mongo::Cursor:0x1031a3e30 ... &gt;
