@@ -121,7 +121,8 @@ module CentralLogger
       end
 
       def logging_colorized?
-        Object.const_defined?(:ActiveRecord) &&
+        # Cache it since these ActiveRecord attributes are assigned after logger initialization occurs
+        @colorized ||= Object.const_defined?(:ActiveRecord) &&
         (Rails::VERSION::MAJOR >= 3 ?
           ActiveRecord::LogSubscriber.colorize_logging :
           ActiveRecord::Base.colorize_logging)
