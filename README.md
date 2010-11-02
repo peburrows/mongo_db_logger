@@ -4,7 +4,11 @@ Log to a central MongoDB from Rails apps.
 
 ## Usage
 
-1. Install the gem:
+1. If using Bundler, add the following to your Gemfile then refresh your dependencies by executing "bundle install":
+
+        gem "central_logger"
+
+1. If you're just using gem:
 
         gem install central_logger
 
@@ -12,13 +16,12 @@ Log to a central MongoDB from Rails apps.
 
         include CentralLogger::Filter
 
-1. If using Rails < 3, configure environment.rb as shown below (in config/environment.rb).  Otherwise, the logger is
-automatically initialized for all environments.
+1. If using Rails 3, SKIP this step.  Otherwise, add the following to config/environment.rb:
 
        require 'central_logger'
        CentralLogger::Initializer.initialize_deprecated_logger(config)
 
-1. Add mongo settings to database.yml for each environment in which you want to use MongoDB for logging. The values below are defaults:
+1. Add mongo settings to database.yml for each environment in which you want to use the Central Logger for logging. The values below are defaults:
 
         development:
           adapter: mysql
