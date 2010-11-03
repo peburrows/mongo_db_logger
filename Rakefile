@@ -24,10 +24,6 @@ Jeweler::Tasks.new do |gem|
   gem.email = "astupka@customink.com"
   gem.homepage = "http://github.com/customink/central_logger"
   gem.authors = ["Phil Burrows", "Alex Stupka"]
-  gem.rubyforge_project = "central_logger"
-end
-Jeweler::RubyforgeTasks.new do |rubyforge|
-  rubyforge.doc_task = "rdoc"
 end
 # dependencies defined in Gemfile
 
