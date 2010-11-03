@@ -52,16 +52,15 @@ module CentralLogger
         :request_time => Time.now.getutc,
         :application_name => @application_name
       })
-      # In case of exception, make sure it's set
-      runtime = 0
-      runtime = Benchmark.measure do
-        yield
-      end
+
+      runtime = Benchmark.measure{ yield }.real
     rescue Exception => e
       add(3, e.message + "\n" + e.backtrace.join("\n"))
       # Reraise the exception for anyone else who cares
       raise e
     ensure
+      # In case of exception, make sure runtime is set
+      runtime ||= 0
       insert_log_record(runtime)
     end
 
@@ -105,7 +104,7 @@ module CentralLogger
       end
 
       def insert_log_record(runtime)
-        @mongo_record[:runtime] = (runtime.real * 1000).ceil
+        @mongo_record[:runtime] = (runtime * 1000).ceil
         @mongo_connection[@mongo_collection_name].insert(@mongo_record) rescue nil
       end
 

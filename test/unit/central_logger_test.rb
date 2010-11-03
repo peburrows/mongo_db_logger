@@ -5,6 +5,8 @@ require 'central_logger/mongo_logger'
 class CentralLogger::MongoLoggerTest < Test::Unit::TestCase
   extend LogMacros
 
+  EXCEPTION_MSG = "Foo"
+
   context "A CentralLogger::MongoLogger" do
     context "during configuration in instantiation" do
       setup do
@@ -47,6 +49,7 @@ class CentralLogger::MongoLoggerTest < Test::Unit::TestCase
       setup do
         @central_logger = CentralLogger::MongoLogger.new
         common_setup
+        @central_logger.reset_collection
       end
 
       context "upon insertion of a log record when active record is not used" do
@@ -67,7 +70,6 @@ class CentralLogger::MongoLoggerTest < Test::Unit::TestCase
         setup do
           @log_message = "TESTING"
           require_bogus_active_record
-          @central_logger.reset_collection
           log("\e[31m #{@log_message} \e[0m")
         end
 
@@ -87,13 +89,20 @@ class CentralLogger::MongoLoggerTest < Test::Unit::TestCase
         log_metadata(options)
         assert_equal 1, @collection.find({"application" => self.class.name}).count
       end
+
+      context "when an exception is raised" do
+        should "log the exception" do
+          assert_raise(RuntimeError, EXCEPTION_MSG) {log_exception(EXCEPTION_MSG)}
+          assert_equal 1, @collection.find_one({"messages.error" => /^#{EXCEPTION_MSG}/})["messages"]["error"].count
+        end
+      end
     end
 
     context "logging at INFO level" do
       setup do
         @central_logger = CentralLogger::MongoLogger.new(:level => CentralLogger::MongoLogger::INFO)
-        @central_logger.reset_collection
         common_setup
+        @central_logger.reset_collection
         log("INFO")
       end
 
@@ -103,5 +112,6 @@ class CentralLogger::MongoLoggerTest < Test::Unit::TestCase
         assert_equal 0, @collection.find_one({}, :fields => ["messages"])["messages"].count
       end
     end
+
   end
 end

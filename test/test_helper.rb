@@ -17,6 +17,12 @@ class Test::Unit::TestCase
     end
   end
 
+  def log_exception(msg)
+    @central_logger.mongoize({"id" => 1}) do
+      raise msg
+    end
+  end
+
   def log_metadata(options)
     @central_logger.mongoize({"id" => 1}) do
       @central_logger.add_metadata(options)
