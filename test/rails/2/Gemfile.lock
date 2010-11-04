@@ -1,0 +1,59 @@
+PATH
+  remote: ../../..
+  specs:
+    central_logger (0.1.1)
+      bson_ext
+      bundler (~> 1.0.0)
+      mongo
+      rake
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    actionmailer (2.3.8)
+      actionpack (= 2.3.8)
+    actionpack (2.3.8)
+      activesupport (= 2.3.8)
+      rack (~> 1.1.0)
+    activerecord (2.3.8)
+      activesupport (= 2.3.8)
+    activeresource (2.3.8)
+      activesupport (= 2.3.8)
+    activesupport (2.3.8)
+    archive-tar-minitar (0.5.2)
+    bson (1.1.1)
+    bson_ext (1.1.1)
+    columnize (0.3.1)
+    linecache19 (0.5.11)
+      ruby_core_source (>= 0.1.4)
+    mongo (1.1.1)
+      bson (>= 1.1.1)
+    rack (1.1.0)
+    rails (2.3.8)
+      actionmailer (= 2.3.8)
+      actionpack (= 2.3.8)
+      activerecord (= 2.3.8)
+      activeresource (= 2.3.8)
+      activesupport (= 2.3.8)
+      rake (>= 0.8.3)
+    rake (0.8.7)
+    ruby-debug-base19 (0.11.24)
+      columnize (>= 0.3.1)
+      linecache19 (>= 0.5.11)
+      ruby_core_source (>= 0.1.4)
+    ruby-debug19 (0.11.6)
+      columnize (>= 0.3.1)
+      linecache19 (>= 0.5.11)
+      ruby-debug-base19 (>= 0.11.19)
+    ruby_core_source (0.1.4)
+      archive-tar-minitar (>= 0.5.2)
+    sqlite3-ruby (1.3.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  central_logger!
+  rails (= 2.3.8)
+  ruby-debug19
+  sqlite3-ruby

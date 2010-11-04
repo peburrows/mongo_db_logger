@@ -1,0 +1,8 @@
+# A sample Gemfile
+source "http://rubygems.org"
+
+gem 'sqlite3-ruby', :require => 'sqlite3'
+
+gem "rails", "2.3.8"
+gem "central_logger", :require => "central_logger", :path => "../../.."
+gem (RUBY_VERSION =~ /^1\.9/ ? "ruby-debug19" : "ruby-debug")
