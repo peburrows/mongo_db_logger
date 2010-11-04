@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Phil Burrows", "Alex Stupka"]
-  s.date = %q{2010-11-03}
+  s.date = %q{2010-11-04}
   s.description = %q{Centralized logging for rails apps using MongoDB. The idea and the core code is from http://github.com/peburrows/central_logger}
   s.email = %q{astupka@customink.com}
   s.extra_rdoc_files = [
