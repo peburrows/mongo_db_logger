@@ -18,6 +18,9 @@ coverage
 rdoc
 pkg
 .bundle
+cscope.files
+cscope.out
+tags
 
 ## PROJECT::SPECIFIC
 *.log
