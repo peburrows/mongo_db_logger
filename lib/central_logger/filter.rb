@@ -7,8 +7,12 @@ module CentralLogger
     def enable_central_logger
       return yield unless Rails.logger.respond_to?(:mongoize)
 
-      # make sure the controller knows how to filter its parameters
-      f_params = respond_to?(:filter_parameters) ? filter_parameters(params) : params
+      # make sure the controller knows how to filter its parameters (Rails 3, 2, respectively)
+      f_params = case
+                   when request.respond_to?(:filtered_parameters) then request.filtered_parameters
+                   when respond_to?(:filter_parameters) then filter_parameters(params)
+                   else params
+                 end
       Rails.logger.mongoize({
         :action         => action_name,
         :controller     => controller_name,
