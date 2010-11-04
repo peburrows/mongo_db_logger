@@ -24,12 +24,14 @@ Jeweler::Tasks.new do |gem|
   gem.email = "astupka@customink.com"
   gem.homepage = "http://github.com/customink/central_logger"
   gem.authors = ["Phil Burrows", "Alex Stupka"]
+  gem.files.exclude 'test/rails/**/*'
+  gem.test_files.exclude 'test/rails/**/*'
 end
 # dependencies defined in Gemfile
 
 Rake::TestTask.new(:test) do |test|
   test.libs << 'lib' << 'test'
-  test.pattern = 'test/**/*_test.rb'
+  test.pattern = 'test/unit/*_test.rb'
   test.verbose = true
 end
 
