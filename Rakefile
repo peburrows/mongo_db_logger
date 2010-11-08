@@ -6,8 +6,8 @@ require 'bundler'
 require 'jeweler'
 
 desc 'Default: run unit tests.'
-task :default => :test
-task :test => :check_dependencies
+task :default => "test:unit"
+task :test => "test:functionals"
 
 begin
   Bundler.setup(:default, :development)
@@ -29,10 +29,34 @@ Jeweler::Tasks.new do |gem|
 end
 # dependencies defined in Gemfile
 
-Rake::TestTask.new(:test) do |test|
-  test.libs << 'lib' << 'test'
-  test.pattern = 'test/unit/*_test.rb'
-  test.verbose = true
+def rake_functionals(opts=nil)
+    if ENV['RUBYOPT']
+      # remove bundler/setup require that prematurely checks for gems and crashes
+      ENV['RUBYOPT'] = ENV['RUBYOPT'].gsub(%r{-r\s*bundler/setup}, '')
+    end
+    # runs all the tests for each ruby version in each rails dir
+    system("bash test/test.sh #{opts}")
+end
+
+namespace :test do
+  desc "Run all tests against all permutations of ruby and rails"
+  task :functionals do
+    rake_functionals
+  end
+
+  namespace :functionals do
+    desc "Clean out gemsets before running functional tests."
+    task :clean do
+      rake_functionals('--clean')
+    end
+  end
+
+  desc "Run unit tests"
+  Rake::TestTask.new(:unit) do |test|
+    test.libs << 'lib' << 'test'
+    test.pattern = 'test/unit/*_test.rb'
+    test.verbose = true
+  end
 end
 
 Rake::RDocTask.new do |rdoc|
