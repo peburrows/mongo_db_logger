@@ -6,7 +6,7 @@ require 'bundler'
 require 'jeweler'
 
 desc 'Default: run unit tests.'
-task :default => "test:unit"
+task :default => "test:units"
 task :test => "test:functionals"
 
 begin
@@ -52,7 +52,7 @@ namespace :test do
   end
 
   desc "Run unit tests"
-  Rake::TestTask.new(:unit) do |test|
+  Rake::TestTask.new(:units) do |test|
     test.libs << 'lib' << 'test'
     test.pattern = 'test/unit/*_test.rb'
     test.verbose = true
