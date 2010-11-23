@@ -21,7 +21,11 @@ Log to a central MongoDB from Rails apps.
        require 'central_logger'
        CentralLogger::Initializer.initialize_deprecated_logger(config)
 
-1. Add mongo settings to database.yml for each environment in which you want to use the Central Logger for logging. The values below are defaults:
+1. Add mongo settings to database.yml for each environment in which you want to use the Central Logger. The central logger will also
+   look for a separate central_logger.yml or mongoid.yml (if you are using mongoid) before looking in database.yml.
+   In the central_logger.yml and mongoid.yml case, the settings should be defined without the 'mongo' subkey.
+
+   database.yml:
 
         development:
           adapter: mysql
@@ -33,13 +37,21 @@ Log to a central MongoDB from Rails apps.
             host: localhost                # default: localhost
             port: 27017                    # default: 27017
 
+    central_logger.yml:
+
+        development:
+          database: my_app
+          capsize: <%= 10.megabytes %>
+          host: localhost
+          port: 27017
+
   With that in place, a new MongoDB document (record) will be created for each request and,
   by default will record the following information: Runtime, IP Address, Request Time, Controller,
   Action, Params, Application Name and All messages sent to the logger. The structure of the Mongo document looks like this:
 
         {
           'action'           : action_name,
-          'application_name' : action_name,
+          'application_name' : application_name (rails root),
           'controller'       : controller_name,
           'ip'               : ip_address,
           'messages'         : {

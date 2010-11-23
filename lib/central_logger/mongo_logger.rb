@@ -7,6 +7,8 @@ module CentralLogger
   class MongoLogger < ActiveSupport::BufferedLogger
     PRODUCTION_COLLECTION_SIZE = 250.megabytes
     DEFAULT_COLLECTION_SIZE = 100.megabytes
+    # Looks for configuration files in this order
+    CONFIGURATION_FILES = ["central_logger.yml", "mongoid.yml", "database.yml"]
 
     attr_reader :db_configuration, :mongo_connection, :mongo_collection_name
 
@@ -74,15 +76,25 @@ module CentralLogger
 
       def configure
         default_capsize = Rails.env.production? ? PRODUCTION_COLLECTION_SIZE : DEFAULT_COLLECTION_SIZE
-        user_config = YAML::load(ERB.new(IO.read(File.join(Rails.root, 'config/database.yml'))).result)[Rails.env]['mongo'] || {}
         @application_name = Rails.root.basename.to_s
-
         @mongo_collection_name = "#{Rails.env}_log"
-
         @db_configuration = {
           'host' => 'localhost',
           'port' => 27017,
-          'capsize' => default_capsize}.merge(user_config)
+          'capsize' => default_capsize}.merge(resolve_config)
+      end
+
+      def resolve_config
+        config = {}
+        CONFIGURATION_FILES.each do |filename|
+          config_file = Rails.root.join("config", filename)
+          if config_file.file?
+            config = YAML.load(ERB.new(config_file.read).result)[Rails.env]
+            config = config['mongo'] if config.has_key?('mongo')
+            break
+          end
+        end
+        config
       end
 
       def connect

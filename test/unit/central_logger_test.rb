@@ -8,39 +8,77 @@ class CentralLogger::MongoLoggerTest < Test::Unit::TestCase
   EXCEPTION_MSG = "Foo"
 
   context "A CentralLogger::MongoLogger" do
-    context "during configuration in instantiation" do
+    setup do
+      # Can use different configs, but most tests use database.yml
+      FileUtils.cp(File.join(SAMPLE_CONFIG_DIR, DEFAULT_CONFIG),  CONFIG_DIR)
+    end
+
+    context "in instantiation" do
       setup do
         CentralLogger::MongoLogger.any_instance.stubs(:internal_initialize).returns(nil)
         @central_logger = CentralLogger::MongoLogger.new
-        @central_logger.send(:configure)
       end
 
-      should "set the default host, port, and capsize if not configured" do
-        assert_equal 'localhost', @central_logger.db_configuration['host']
-        assert_equal 27017, @central_logger.db_configuration['port']
-        assert_equal CentralLogger::MongoLogger::DEFAULT_COLLECTION_SIZE, @central_logger.db_configuration['capsize']
-      end
-
-      should "set the mongo collection name depending on the Rails environment" do
-        assert_equal "#{Rails.env}_log", @central_logger.mongo_collection_name
-      end
-
-      context "upon connecting to an empty database" do
+      context "during configuration when using a separate " + LOGGER_CONFIG do
         setup do
-          @central_logger.send(:connect)
-          common_setup
-          @collection.drop
+          setup_for_config(LOGGER_CONFIG)
         end
 
-        should "expose a valid mongo connection" do
-          assert_instance_of Mongo::DB, @central_logger.mongo_connection
+        should_use_database_name_in_config
+
+        teardown do
+          teardown_for_config(LOGGER_CONFIG)
+        end
+      end
+
+      context "during configuration when using a separate " + MONGOID_CONFIG do
+        setup do
+          setup_for_config(MONGOID_CONFIG)
         end
 
-        should "create a capped collection in the database with the configured size" do
-          @central_logger.send(:check_for_collection)
-          assert @con.collection_names.include?(@central_logger.mongo_collection_name)
-          # new capped collections are X MB + 5888 bytes, but don't be too strict in case that changes
-          assert @collection.stats["storageSize"] < CentralLogger::MongoLogger::DEFAULT_COLLECTION_SIZE + 1.megabyte
+        should_use_database_name_in_config
+
+        teardown do
+          teardown_for_config(MONGOID_CONFIG)
+        end
+      end
+
+      context "after configuration" do
+        setup do
+          @central_logger.send(:configure)
+        end
+
+        should "set the default host, port, and capsize if not configured" do
+          assert_equal 'localhost', @central_logger.db_configuration['host']
+          assert_equal 27017, @central_logger.db_configuration['port']
+          assert_equal CentralLogger::MongoLogger::DEFAULT_COLLECTION_SIZE, @central_logger.db_configuration['capsize']
+        end
+
+        should "set the mongo collection name depending on the Rails environment" do
+          assert_equal "#{Rails.env}_log", @central_logger.mongo_collection_name
+        end
+
+        should "use the database name in the config file" do
+          assert_equal "system_log", @central_logger.db_configuration['database']
+        end
+
+        context "upon connecting to an empty database" do
+          setup do
+            @central_logger.send(:connect)
+            common_setup
+            @collection.drop
+          end
+
+          should "expose a valid mongo connection" do
+            assert_instance_of Mongo::DB, @central_logger.mongo_connection
+          end
+
+          should "create a capped collection in the database with the configured size" do
+            @central_logger.send(:check_for_collection)
+            assert @con.collection_names.include?(@central_logger.mongo_collection_name)
+            # new capped collections are X MB + 5888 bytes, but don't be too strict in case that changes
+            assert @collection.stats["storageSize"] < CentralLogger::MongoLogger::DEFAULT_COLLECTION_SIZE + 1.megabyte
+          end
         end
       end
     end
@@ -112,6 +150,9 @@ class CentralLogger::MongoLoggerTest < Test::Unit::TestCase
         assert_equal 0, @collection.find_one({}, :fields => ["messages"])["messages"].count
       end
     end
-
+    teardown do
+      file = File.join(CONFIG_DIR, DEFAULT_CONFIG)
+      File.delete(file) if File.exist?(file)
+    end
   end
 end
