@@ -18,9 +18,8 @@ module CentralLogger
       super(path, level)
       internal_initialize
     rescue => e
-      # in case the logger is fouled up use stdout
-      puts "=> !! A connection to mongo could not be established - the logger will function like a normal ActiveSupport::BufferedLogger !!"
-      puts e.message + "\n" + e.backtrace.join("\n")
+      # should use a config block for this
+      Rails.env.production? ? (raise e) : (puts "Using BufferedLogger due to exception: " + e.message)
     end
 
     def add_metadata(options={})
@@ -109,7 +108,8 @@ module CentralLogger
 
         if @db_configuration['username'] && @db_configuration['password']
           # the driver stores credentials in case reconnection is required
-          @authenticated = @mongo_connection.authenticate(@db_configuration['username'], @db_configuration['password'])
+          @authenticated = @mongo_connection.authenticate(@db_configuration['username'],
+                                                          @db_configuration['password'])
         end
       end
 
