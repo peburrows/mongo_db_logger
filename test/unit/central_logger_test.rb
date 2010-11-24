@@ -43,6 +43,24 @@ class CentralLogger::MongoLoggerTest < Test::Unit::TestCase
         end
       end
 
+      # this test will work without the --auth mongod arg
+      context "upon connecting with authentication settings" do
+        setup do
+          setup_for_config(DEFAULT_CONFIG_WITH_AUTH, DEFAULT_CONFIG)
+          create_user
+        end
+
+        should "authenticate with the credentials in the configuration" do
+          @central_logger.send(:connect)
+          assert @central_logger.authenticated?
+        end
+
+        teardown do
+          # config will be deleted by outer teardown
+          remove_user
+        end
+      end
+
       context "after configuration" do
         setup do
           @central_logger.send(:configure)
@@ -71,6 +89,10 @@ class CentralLogger::MongoLoggerTest < Test::Unit::TestCase
 
           should "expose a valid mongo connection" do
             assert_instance_of Mongo::DB, @central_logger.mongo_connection
+          end
+
+          should "not authenticate" do
+            assert !@central_logger.authenticated?
           end
 
           should "create a capped collection in the database with the configured size" do

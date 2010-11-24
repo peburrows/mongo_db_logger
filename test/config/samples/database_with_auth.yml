@@ -1,0 +1,8 @@
+test:
+  adapter: mysql
+  username: user
+  database: database
+  mongo:
+    database: system_log
+    username: admin
+    password: password

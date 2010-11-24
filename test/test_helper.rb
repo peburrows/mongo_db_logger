@@ -15,6 +15,7 @@ class Test::Unit::TestCase
   CONFIG_DIR = Rails.root.join("config")
   SAMPLE_CONFIG_DIR = File.join(CONFIG_DIR, "samples")
   DEFAULT_CONFIG = "database.yml"
+  DEFAULT_CONFIG_WITH_AUTH = "database_with_auth.yml"
   MONGOID_CONFIG = "mongoid.yml"
   LOGGER_CONFIG = "central_logger.yml"
 
@@ -30,9 +31,9 @@ class Test::Unit::TestCase
     end
   end
 
-  def setup_for_config(file)
+  def setup_for_config(source, dest=source)
     File.delete(File.join(CONFIG_DIR, DEFAULT_CONFIG))
-    FileUtils.cp(File.join(SAMPLE_CONFIG_DIR, file),  CONFIG_DIR)
+    FileUtils.cp(File.join(SAMPLE_CONFIG_DIR, source),  File.join(CONFIG_DIR, dest))
     @central_logger.send(:configure)
   end
 
@@ -54,4 +55,17 @@ class Test::Unit::TestCase
     @con = @central_logger.mongo_connection
     @collection = @con[@central_logger.mongo_collection_name]
   end
+
+  def create_user
+    db_conf = @central_logger.db_configuration
+    @user = db_conf['username']
+    mongo_connection = Mongo::Connection.new(db_conf['host'],
+                                             db_conf['port']).db(db_conf['database'])
+    mongo_connection.add_user(@user, db_conf['password'])
+  end
+
+  def remove_user
+    @central_logger.mongo_connection.remove_user(@user)
+  end
+
 end

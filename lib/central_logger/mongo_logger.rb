@@ -66,6 +66,10 @@ module CentralLogger
       insert_log_record(runtime)
     end
 
+    def authenticated?
+      @authenticated
+    end
+
     private
       # facilitate testing
       def internal_initialize
@@ -78,6 +82,7 @@ module CentralLogger
         default_capsize = Rails.env.production? ? PRODUCTION_COLLECTION_SIZE : DEFAULT_COLLECTION_SIZE
         @application_name = Rails.root.basename.to_s
         @mongo_collection_name = "#{Rails.env}_log"
+        @authenticated = false
         @db_configuration = {
           'host' => 'localhost',
           'port' => 27017,
@@ -101,6 +106,11 @@ module CentralLogger
         @mongo_connection ||= Mongo::Connection.new(@db_configuration['host'],
                                                     @db_configuration['port'],
                                                     :auto_reconnect => true).db(@db_configuration['database'])
+
+        if @db_configuration['username'] && @db_configuration['password']
+          # the driver stores credentials in case reconnection is required
+          @authenticated = @mongo_connection.authenticate(@db_configuration['username'], @db_configuration['password'])
+        end
       end
 
       def create_collection
@@ -132,7 +142,7 @@ module CentralLogger
       end
 
       def logging_colorized?
-        # Cache it since these ActiveRecord attributes are assigned after logger initialization occurs
+        # Cache it since these ActiveRecord attributes are assigned after logger initialization occurs in Rails boot
         @colorized ||= Object.const_defined?(:ActiveRecord) &&
         (Rails::VERSION::MAJOR >= 3 ?
           ActiveRecord::LogSubscriber.colorize_logging :
