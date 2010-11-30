@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{central_logger}
-  s.version = "0.1.1"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Phil Burrows", "Alex Stupka"]
-  s.date = %q{2010-11-04}
+  s.date = %q{2010-11-30}
   s.description = %q{Centralized logging for rails apps using MongoDB. The idea and the core code is from http://github.com/peburrows/central_logger}
   s.email = %q{astupka@customink.com}
   s.extra_rdoc_files = [
@@ -29,11 +29,15 @@ Gem::Specification.new do |s|
     "lib/central_logger/initializer.rb",
     "lib/central_logger/initializer_mixin.rb",
     "lib/central_logger/mongo_logger.rb",
-    "lib/railtie.rb",
+    "lib/central_logger/railtie.rb",
     "test/active_record.rb",
-    "test/config/database.yml",
+    "test/config/samples/central_logger.yml",
+    "test/config/samples/database.yml",
+    "test/config/samples/database_with_auth.yml",
+    "test/config/samples/mongoid.yml",
     "test/rails.rb",
     "test/shoulda_macros/log_macros.rb",
+    "test/test.sh",
     "test/test_helper.rb",
     "test/unit/central_logger_test.rb"
   ]
