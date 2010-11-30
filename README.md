@@ -64,7 +64,7 @@ Log to a central MongoDB from Rails apps.
           'params'           : { },
           'path'             : path,
           'request_time'     : date_of_request,
-          'runtime'          : elapsed_execution_time_in_seconds,
+          'runtime'          : elapsed_execution_time_in_milliseconds,
           'url'              : full_url
         }
 
@@ -75,7 +75,7 @@ Log to a central MongoDB from Rails apps.
 
         # make sure we're using the CentralLogger in this environment
         if Rails.logger.respond_to?(:add_metadata)
-          Rails.logger.add_metadata(:user_guid =&gt; @user_guid)
+          Rails.logger.add_metadata(:user_guid => @user_guid)
         end
 
 ## Examples
