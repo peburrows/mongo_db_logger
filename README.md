@@ -109,4 +109,8 @@ Find all requests with an exception that contains "RoutingError" in the message 
 
     >> collection.find({"messages.error" => /RoutingError/})
 
+Find all requests with a request_date greater than '11/18/2010 22:59:52 GMT'
+
+    >> collection.find({:request_time => {'$gt' => Time.utc(2010, 11, 18, 22, 59, 52)}})
+
 Copyright (c) 2009 Phil Burrows, released under the MIT license
