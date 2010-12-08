@@ -32,10 +32,11 @@ Log to a central MongoDB from Rails apps.
           database: my_app_development
           user: root
           mongo:
-            database: my_app               # required
+            database: my_app               # required (the only required setting)
             capsize: <%= 10.megabytes %>   # default: 250MB for production; 100MB otherwise
             host: localhost                # default: localhost
             port: 27017                    # default: 27017
+            replica_set: true              # default: false - Adds safe inserts and retries for ConnectionFailure during voting
 
     central_logger.yml:
 
@@ -44,6 +45,7 @@ Log to a central MongoDB from Rails apps.
           capsize: <%= 10.megabytes %>
           host: localhost
           port: 27017
+          replica_set: true
 
   With that in place, a new MongoDB document (record) will be created for each request and,
   by default will record the following information: Runtime, IP Address, Request Time, Controller,
