@@ -17,6 +17,7 @@ class Test::Unit::TestCase
   DEFAULT_CONFIG = "database.yml"
   DEFAULT_CONFIG_WITH_AUTH = "database_with_auth.yml"
   MONGOID_CONFIG = "mongoid.yml"
+  REPLICA_SET_CONFIG = "database_replica_set.yml"
   LOGGER_CONFIG = "central_logger.yml"
 
   def log(msg)
@@ -33,8 +34,12 @@ class Test::Unit::TestCase
 
   def setup_for_config(source, dest=source)
     File.delete(File.join(CONFIG_DIR, DEFAULT_CONFIG))
-    FileUtils.cp(File.join(SAMPLE_CONFIG_DIR, source),  File.join(CONFIG_DIR, dest))
+    cp_config(source, dest)
     @central_logger.send(:configure)
+  end
+
+  def cp_config(source, dest=source)
+    FileUtils.cp(File.join(SAMPLE_CONFIG_DIR, source),  File.join(CONFIG_DIR, dest))
   end
 
   def teardown_for_config(file)

@@ -2,15 +2,18 @@ require 'erb'
 require 'mongo'
 require 'active_support'
 require 'active_support/core_ext'
+require 'central_logger/replica_set_helper'
 
 module CentralLogger
   class MongoLogger < ActiveSupport::BufferedLogger
+    include ReplicaSetHelper
+
     PRODUCTION_COLLECTION_SIZE = 250.megabytes
     DEFAULT_COLLECTION_SIZE = 100.megabytes
     # Looks for configuration files in this order
     CONFIGURATION_FILES = ["central_logger.yml", "mongoid.yml", "database.yml"]
 
-    attr_reader :db_configuration, :mongo_connection, :mongo_collection_name
+    attr_reader :db_configuration, :mongo_connection, :mongo_collection_name, :mongo_collection
 
     def initialize(options={})
       path = options[:path] || File.join(Rails.root, "log/#{Rails.env}.log")
@@ -43,7 +46,7 @@ module CentralLogger
 
     # Drop the capped_collection and recreate it
     def reset_collection
-      @mongo_connection[@mongo_collection_name].drop
+      @mongo_collection.drop
       create_collection
     end
 
@@ -61,8 +64,8 @@ module CentralLogger
       raise e
     ensure
       # In case of exception, make sure runtime is set
-      runtime ||= 0
-      insert_log_record(runtime)
+      @mongo_record[:runtime] = ((runtime ||= 0) * 1000).ceil
+      @insert_block.call
     end
 
     def authenticated?
@@ -86,6 +89,10 @@ module CentralLogger
           'host' => 'localhost',
           'port' => 27017,
           'capsize' => default_capsize}.merge(resolve_config)
+
+        @insert_block = @db_configuration.has_key?('replica_set') && @db_configuration['replica_set'] ?
+          lambda { rescue_connection_failure{ insert_log_record(true) } } :
+          lambda { insert_log_record }
       end
 
       def resolve_config
@@ -123,11 +130,11 @@ module CentralLogger
         unless @mongo_connection.collection_names.include?(@mongo_collection_name)
           create_collection
         end
+        @mongo_collection = @mongo_connection[@mongo_collection_name]
       end
 
-      def insert_log_record(runtime)
-        @mongo_record[:runtime] = (runtime * 1000).ceil
-        @mongo_connection[@mongo_collection_name].insert(@mongo_record) rescue nil
+      def insert_log_record(safe=false)
+        @mongo_collection.insert(@mongo_record, :safe => safe)
       end
 
       def level_to_sym(level)
