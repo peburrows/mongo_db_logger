@@ -1,7 +1,7 @@
 PATH
   remote: ../../..
   specs:
-    central_logger (0.1.1)
+    central_logger (0.2.0)
       bson_ext
       bundler (~> 1.0.0)
       mongo
@@ -39,8 +39,8 @@ GEM
     activesupport (3.0.0)
     arel (1.0.1)
       activesupport (~> 3.0.0)
-    bson (1.1.2)
-    bson_ext (1.1.2)
+    bson (1.1.4)
+    bson_ext (1.1.4)
     builder (2.1.2)
     erubis (2.6.6)
       abstract (>= 1.0.0)
@@ -51,7 +51,7 @@ GEM
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
     mime-types (1.16)
-    mongo (1.1.2)
+    mongo (1.1.4)
       bson (>= 1.1.1)
     polyglot (0.3.1)
     rack (1.2.1)
