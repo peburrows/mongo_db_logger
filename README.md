@@ -63,6 +63,13 @@ if Rails.logger.respond_to?(:add_metadata)
 end
 </code></pre>
 
+3.5) MongoLogger also checks for the MONGOHQ_URL string in your environment.  Should the 
+variable be set, MongoLogger will use that instead your database configuration.  This 
+allows MongoLogger to work with Heroku out of the box.  Related docs on this:  
+
+<a href="http://addons.heroku.com/mongohq">http://addons.heroku.com/mongohq</a><br />
+<a href="http://doejo.com/blog/rails-mongodb-logging-on-heroku-with-mongohq">http://doejo.com/blog/rails-mongodb-logging-on-heroku-with-mongohq</a>
+
 4) And optionally, and PLEASE be sure to protect this behind a login, you can add a basic
 logging view by adding the following to your routes:
 

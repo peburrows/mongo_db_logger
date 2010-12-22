@@ -13,11 +13,22 @@ class MongoLogger < ActiveSupport::BufferedLogger
 
   begin
     @mongo_collection_name      = "#{Rails.env}_log"
-    @mongo_connection ||= Mongo::Connection.new(db_configuration['host'], db_configuration['port'], :auto_reconnect => true).db(db_configuration['database'])
+
+    # out of the box support for Heroku
+    # change adapted from http://doejo.com/blog/rails-mongodb-logging-on-heroku-with-mongohq
+    if ENV['MONGOHQ_URL']
+        uri = URI.parse(ENV['MONGOHQ_URL'])
+        @mongo_connection ||= Mongo::Connection.new(uri.host, uri.port, :auto_reconnect => true).db(uri.path.gsub(/^\//, ''))
+        @mongo_connection.authenticate(uri.user, uri.password)
+        capsize = 10.megabytes
+    else 
+      @mongo_connection ||= Mongo::Connection.new(db_configuration['host'], db_configuration['port'], :auto_reconnect => true).db(db_configuration['database'])
+      capsize = db_configuration['capsize']
+    end 
 
     # setup the capped collection if it doesn't already exist
     unless @mongo_connection.collection_names.include?(@mongo_collection_name)
-      @mongo_connection.create_collection(@mongo_collection_name, {:capped => true, :size => db_configuration['capsize']})
+      @mongo_connection.create_collection(@mongo_collection_name, {:capped => true, :size => capsize})
     end
   rescue => e
     puts "=> !! A connection to mongo could not be established - the logger will function like a normal ActiveSupport::BufferedLogger !!"
