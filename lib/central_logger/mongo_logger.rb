@@ -36,12 +36,12 @@ module CentralLogger
     end
 
     def add(severity, message = nil, progname = nil, &block)
+      super
       if @level <= severity && message.present? && @mongo_record.present?
         # remove Rails colorization to get the actual message
         message.gsub!(/(\e(\[([\d;]*[mz]?))?)?/, '').strip! if logging_colorized?
         @mongo_record[:messages][level_to_sym(severity)] << message
       end
-      super
     end
 
     # Drop the capped_collection and recreate it
