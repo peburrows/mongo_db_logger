@@ -1,0 +1,4 @@
+database: 'appname'
+collection: 'log'
+host: 'localhost'
+port: 27017

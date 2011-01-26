@@ -1,0 +1,20 @@
+<table>
+  <thead>
+    <tr>
+      <th>Request Time</th>
+      <th>Controller</th>
+      <th>Action</th>
+      <th>Params</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @records.each do |record| %>
+      <tr>
+        <td><a href="/show/<%= record['_id'] %>"><%= record['request_time'] %></a></td>
+        <td><%= record['controller'] %></td>
+        <td><%= record['action'] %></td>
+        <td><code><%= h(record['params'].inspect) %></code></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

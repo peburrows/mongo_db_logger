@@ -25,3 +25,4 @@ tags
 ## PROJECT::SPECIFIC
 *.log
 *_db
+lib/central_logger/server/database.yml

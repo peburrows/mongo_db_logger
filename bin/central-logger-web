@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH.unshift File.expand_path(File.dirname(__FILE__) + '/../lib')
+begin
+  require 'vegas'
+rescue LoadError
+  require 'rubygems'
+  require 'vegas'
+end
+require 'central_logger/server'
+
+
+Vegas::Runner.new(CentralLogger::Server, 'central-logger-web', {
+  :before_run => lambda {|v|
+    path = v.args.first
+    raise "you must specify a configuration file" unless path
+    CentralLogger::Server.load_config(path)
+  }
+})
