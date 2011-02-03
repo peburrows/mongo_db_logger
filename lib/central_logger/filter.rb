@@ -14,6 +14,7 @@ module CentralLogger
                    else params
                  end
       Rails.logger.mongoize({
+        :method         => request.method,
         :action         => action_name,
         :controller     => controller_name,
         :path           => request.path,
