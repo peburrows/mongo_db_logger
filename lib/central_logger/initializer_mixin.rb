@@ -6,6 +6,12 @@ module CentralLogger
       logger = MongoLogger.new(:path => path, :level => level)
       logger.auto_flushing = false if Rails.env.production?
       logger
+    rescue Mongo::ConnectionFailure => mongo_error
+      logger = ActiveSupport::BufferedLogger.new(path)
+      logger.level = level
+      logger.autho_flushing = false if Rails.env.production?
+      puts "** CentralLogger Initialization Error: #{mongo_error.message}. Using ActiveSupport::BufferedLogger due to exception."
+      logger
     rescue StandardError => e
       logger = ActiveSupport::BufferedLogger.new(STDERR)
       logger.level = ActiveSupport::BufferedLogger::WARN

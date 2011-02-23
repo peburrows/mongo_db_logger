@@ -20,9 +20,10 @@ module CentralLogger
       level = options[:level] || DEBUG
       super(path, level)
       internal_initialize
-    rescue => e
+      # we want errors to bubble up so we don't initialize the MongoLogger when we are unable to connect to mongo
+    # rescue => e
       # should use a config block for this
-      Rails.env.production? ? (raise e) : (puts "Using BufferedLogger due to exception: " + e.message)
+      # Rails.env.production? ? (raise e) : (puts "Using BufferedLogger due to exception: " + e.message)
     end
 
     def add_metadata(options={})
