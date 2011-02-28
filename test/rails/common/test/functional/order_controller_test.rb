@@ -7,6 +7,10 @@ class OrderControllerTest < ActionController::TestCase
     common_setup
   end
 
+  def rails3?
+    Rails.root.to_s.index('3')
+  end
+
   test "should have log level set" do
     assert_equal ActiveSupport::BufferedLogger.const_get(Rails.configuration.log_level.to_s.upcase), Rails.logger.level
   end
@@ -29,6 +33,17 @@ class OrderControllerTest < ActionController::TestCase
   test "should log extra metadata" do
     get :index
     assert_equal Rails.root.basename.to_s, @collection.find_one({}, :fields => "application_name_again")["application_name_again"]
+  end
+
+  test "should log request parameters" do
+    get :index
+    log = @collection.find_one()
+    http_method = rails3? ? 'GET' : :get
+
+    assert_equal http_method, log['method']
+    assert_equal '/order', log['path']
+    assert_equal 'http://test.host/order', log['url']
+    assert_equal '0.0.0.0', log['ip']
   end
 
   test "should log exceptions" do
